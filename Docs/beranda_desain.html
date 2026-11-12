@@ -1,0 +1,1525 @@
+# Product Requirements Document (PRD)
+
+# KantinQ — Sistem Pre-order Makanan Kantin Kampus
+
+| Atribut | Keterangan |
+|---|---|
+| **Nama Produk** | KantinQ |
+| **Kode Proyek** | Proyek 05 |
+| **Mata Kuliah** | Mobile Technology |
+| **Versi Dokumen** | 1.0 (Draft untuk review) |
+| **Tanggal** | 16 Oktober 2026 |
+| **Basis Dokumen** | Proposal Proyek 05: KantinQ (13 Oktober 2026) |
+| **Penyusun Proposal** | Tri Dewi Wulandari (20241230003), Elsa Mala Mahasina (20241230004), Syafinatus Safara
+(20241230018) |
+| **Status** | Draft |
+
+> **Catatan konvensi:** Bagian yang berasal langsung dari proposal ditulis sebagai requirement. Bagian yang merupakan
+**asumsi/usulan tambahan** dari penyusun PRD ditandai dengan label **[Asumsi]** dan perlu dikonfirmasi tim (lihat Bagian
+20).
+
+---
+
+## Daftar Isi
+
+1. [Ringkasan Eksekutif](#1-ringkasan-eksekutif)
+2. [Latar Belakang dan Pernyataan Masalah](#2-latar-belakang-dan-pernyataan-masalah)
+3. [Visi, Tujuan, dan Non-Tujuan](#3-visi-tujuan-dan-non-tujuan)
+4. [Metrik Keberhasilan](#4-metrik-keberhasilan)
+5. [Pengguna dan Persona](#5-pengguna-dan-persona)
+6. [Ruang Lingkup](#6-ruang-lingkup)
+7. [User Stories](#7-user-stories)
+8. [Alur Pengguna (User Flow)](#8-alur-pengguna-user-flow)
+9. [Kebutuhan Fungsional](#9-kebutuhan-fungsional)
+10. [Kebutuhan Non-Fungsional](#10-kebutuhan-non-fungsional)
+11. [Aturan Bisnis](#11-aturan-bisnis)
+12. [Rancangan Antarmuka (UI)](#12-rancangan-antarmuka-ui)
+13. [Arsitektur dan Rancangan Teknis](#13-arsitektur-dan-rancangan-teknis)
+14. [Model Data](#14-model-data)
+15. [Spesifikasi API](#15-spesifikasi-api)
+16. [Kasus Tepi dan Penanganan Error](#16-kasus-tepi-dan-penanganan-error)
+17. [Strategi Pengujian dan Kriteria Penerimaan](#17-strategi-pengujian-dan-kriteria-penerimaan)
+18. [Risiko dan Mitigasi](#18-risiko-dan-mitigasi)
+19. [Jadwal, Milestone, dan Pembagian Tugas](#19-jadwal-milestone-dan-pembagian-tugas)
+20. [Asumsi, Dependensi, dan Pertanyaan Terbuka](#20-asumsi-dependensi-dan-pertanyaan-terbuka)
+21. [Roadmap Pengembangan Lanjutan](#21-roadmap-pengembangan-lanjutan)
+22. [Glosarium](#22-glosarium)
+
+---
+
+## 1. Ringkasan Eksekutif
+
+KantinQ adalah aplikasi mobile pemesanan makanan (*pre-order*) dari berbagai tenan di kantin kampus. Mahasiswa dapat
+memilih tenan dan menu, memesan, membayar (simulasi), dan memantau status pesanan dari mana saja, termasuk dari ruang
+kelas, lalu mengambil makanan yang sudah siap tanpa mengantre. Penjual (tenan) memperoleh dashboard untuk mengelola
+menu, stok, dan pesanan masuk secara terorganisasi.
+
+**Proposisi nilai:**
+
+- **Mahasiswa:** waktu istirahat lebih efisien, kepastian mendapat makanan, satu aplikasi untuk banyak tenan.
+- **Penjual:** pesanan tercatat rapi dan minim salah catat, stok terpantau, persiapan lebih awal sebelum pembeli tiba.
+- **Kampus:** kantin lebih tertib dan arus pengunjung lebih terkendali.
+
+**Batasan rilis ini:** pembayaran bersifat simulasi (*dummy payment gateway*), tanpa pengantaran makanan, serta tanpa
+ulasan/promo/loyalitas.
+
+---
+
+## 2. Latar Belakang dan Pernyataan Masalah
+
+### 2.1 Latar belakang
+Pada jam istirahat, kantin kampus dipadati mahasiswa dalam waktu bersamaan. Antrean di tiap tenan menjadi panjang, waktu
+istirahat yang singkat habis untuk menunggu, dan sebagian mahasiswa tidak sempat makan. Di sisi penjual, pesanan yang
+datang serentak sering dicatat manual sehingga rawan salah catat, lambat, dan sulit dipantau.
+
+### 2.2 Pernyataan masalah
+
+| # | Masalah | Dampak |
+|---|---|---|
+| P1 | Antrean panjang pada jam istirahat | Waktu istirahat terbuang, sebagian mahasiswa tidak sempat makan |
+| P2 | Mahasiswa tidak tahu menu dan ketersediaan stok tanpa datang langsung | Ketidakpastian, antre lalu mendapati menu
+habis |
+| P3 | Pencatatan pesanan manual oleh penjual | Salah catat, lambat, sulit dipantau |
+| P4 | Tidak ada informasi status pesanan | Pembeli harus menunggu di lokasi untuk memastikan |
+
+### 2.3 Pertanyaan yang dijawab produk (dari Rumusan Masalah)
+1. Bagaimana mengurangi antrean panjang di kantin pada jam istirahat?
+2. Bagaimana mahasiswa melihat menu dan stok dari berbagai tenan dalam satu aplikasi?
+3. Bagaimana penjual menerima, memproses, dan memperbarui status pesanan secara efisien?
+4. Bagaimana status pesanan dipantau pembeli secara hampir *real-time*?
+
+---
+
+## 3. Visi, Tujuan, dan Non-Tujuan
+
+### 3.1 Visi
+Menjadikan pengalaman makan di kantin kampus cepat, pasti, dan tertib tanpa antrean.
+
+### 3.2 Tujuan
+**Tujuan umum:** membangun aplikasi pre-order makanan kantin yang memudahkan mahasiswa memesan tanpa antre dan membantu
+penjual mengelola pesanan.
+
+**Tujuan khusus:**
+
+| ID | Tujuan | Pemetaan Fitur |
+|---|---|---|
+| G1 | Menyediakan daftar tenan beserta menu dan ketersediaan stok | FR-TNN, FR-MNU |
+| G2 | Menyediakan keranjang dengan porsi, catatan, dan total harga | FR-KRJ |
+| G3 | Menyediakan pelacakan status pesanan (antrean, diproses, selesai) | FR-STS |
+| G4 | Menyediakan dashboard penjual untuk mengelola menu dan pesanan | FR-DSB, FR-MNG |
+| G5 | Mensimulasikan pembayaran melalui dummy payment gateway | FR-PAY |
+
+### 3.3 Non-tujuan (rilis ini)
+- Integrasi pembayaran nyata (e-wallet, QRIS produksi).
+- Layanan pengantaran makanan.
+- Ulasan, promo, dan program loyalitas.
+
+---
+
+## 4. Metrik Keberhasilan
+
+### 4.1 Indikator keberhasilan (dari proposal)
+
+| ID | Indikator | Cara Verifikasi |
+|---|---|---|
+| S1 | Pembeli menyelesaikan alur dari memilih menu sampai status "Selesai" tanpa kendala | Uji alur end-to-end (UAT) |
+| S2 | Penjual mengelola menu, stok, dan pesanan lewat dashboard | Uji fungsional dashboard |
+| S3 | Status pesanan terbarui dalam waktu singkat setelah diubah penjual | Pengukuran latensi pembaruan status |
+| S4 | Seluruh fitur Tahap UI dan Tahap API berfungsi dan lolos pengujian | Laporan pengujian Minggu 8 |
+
+### 4.2 Target terukur **[Asumsi]**
+
+| Metrik | Target |
+|---|---|
+| Latensi pembaruan status (penjual ubah → tampil di pembeli) | ≤ 5 detik (WebSocket) / ≤ interval polling (maks. 10
+detik) |
+| Waktu pemesanan dari buka aplikasi hingga pesanan terkirim | ≤ 2 menit untuk pengguna baru |
+| Tingkat keberhasilan alur pemesanan pada pengujian | ≥ 95% skenario lulus |
+| Waktu respons API (p95) pada beban uji | ≤ 500 ms |
+| Kasus *overselling* stok pada uji konkurensi | 0 |
+
+---
+
+## 5. Pengguna dan Persona
+
+### 5.1 Peran (role)
+
+| Peran | Deskripsi | Platform |
+|---|---|---|
+| **Pembeli (Mahasiswa)** | Memesan makanan dan memantau status pesanan | Aplikasi mobile |
+| **Penjual (Tenan/Merchant)** | Mengelola menu, stok, dan pesanan masuk | Tampilan merchant (dashboard) |
+| **Admin sistem** **[Asumsi]** | Menyiapkan akun/tenan awal (dapat berupa seed data) | Seed/backend |
+
+### 5.2 Persona
+
+**Persona 1 — Dika, mahasiswa semester 3 (Pembeli)**
+- *Konteks:* Istirahat 30 menit, kelas berikutnya dimulai tepat waktu.
+- *Kebutuhan:* Memastikan makanan siap saat tiba; tidak antre.
+- *Frustrasi:* Antrean panjang, menu habis setelah menunggu lama.
+- *Perangkat:* Smartphone Android/iOS, koneksi kampus/seluler.
+
+**Persona 2 — Bu Sri, pemilik tenan nasi (Penjual)**
+- *Konteks:* Melayani banyak pembeli dalam waktu singkat; pencatatan manual.
+- *Kebutuhan:* Antarmuka sederhana, daftar pesanan jelas, update stok cepat.
+- *Frustrasi:* Salah catat, pesanan terlewat, sulit memprediksi stok.
+- *Kemampuan teknologi:* Dasar; butuh panduan singkat.
+
+---
+
+## 6. Ruang Lingkup
+
+### 6.1 Dalam lingkup
+- Aplikasi untuk pembeli dan tampilan merchant untuk penjual.
+- Pengelolaan menu, harga, dan stok per tenan.
+- Pemesanan, keranjang, dan pelacakan status pesanan.
+- Simulasi pembayaran (dummy payment).
+- Autentikasi dengan peran terpisah (pembeli dan penjual).
+
+### 6.2 Di luar lingkup
+- Pembayaran nyata (e-wallet/QRIS produksi).
+- Pengantaran makanan.
+- Ulasan, promo, dan loyalitas.
+
+### 6.3 Tahap pengembangan
+
+| Tahap | Cakupan |
+|---|---|
+| **Tahap UI** | Daftar Tenan, Keranjang, Status Pesanan, Dashboard Penjual |
+| **Tahap API** | Menu Tenan (CRUD), Keranjang API, Update Status, Dummy Payment |
+
+---
+
+## 7. User Stories
+
+### 7.1 Pembeli
+
+| ID | User Story | Prioritas |
+|---|---|---|
+| US-01 | Sebagai pembeli, saya ingin mendaftar/masuk ke akun agar pesanan saya tercatat. | Must |
+| US-02 | Sebagai pembeli, saya ingin melihat daftar tenan agar dapat memilih tempat membeli. | Must |
+| US-03 | Sebagai pembeli, saya ingin melihat menu, harga, dan ketersediaan stok tiap tenan agar tahu apa yang bisa
+dipesan. | Must |
+| US-04 | Sebagai pembeli, saya ingin menambahkan menu ke keranjang dengan jumlah porsi dan catatan agar pesanan sesuai
+selera. | Must |
+| US-05 | Sebagai pembeli, saya ingin melihat total harga di keranjang sebelum membayar. | Must |
+| US-06 | Sebagai pembeli, saya ingin membayar (simulasi) agar pesanan masuk ke antrean tenan. | Must |
+| US-07 | Sebagai pembeli, saya ingin memantau status pesanan (antrean/diproses/selesai) agar tahu kapan harus
+mengambil. | Must |
+| US-08 | Sebagai pembeli, saya ingin mendapat pembaruan saat pesanan selesai. | Must |
+| US-09 | Sebagai pembeli, saya ingin melihat riwayat pesanan. **[Asumsi]** | Should |
+| US-10 | Sebagai pembeli, saya ingin membatalkan pesanan yang belum diproses. **[Asumsi]** | Could |
+| US-11 | Sebagai pembeli, saya ingin mencari menu/tenan berdasarkan nama. **[Asumsi]** | Could |
+
+### 7.2 Penjual
+
+| ID | User Story | Prioritas |
+|---|---|---|
+| US-12 | Sebagai penjual, saya ingin masuk ke dashboard khusus tenan saya. | Must |
+| US-13 | Sebagai penjual, saya ingin menambah, melihat, mengubah, dan menghapus menu beserta harga. | Must |
+| US-14 | Sebagai penjual, saya ingin memperbarui stok dengan cepat agar sesuai kondisi nyata. | Must |
+| US-15 | Sebagai penjual, saya ingin melihat pesanan masuk secara terurut agar tidak ada yang terlewat. | Must |
+| US-16 | Sebagai penjual, saya ingin mengubah status pesanan menjadi "Diproses" lalu "Selesai". | Must |
+| US-17 | Sebagai penjual, saya ingin stok berkurang otomatis saat pesanan masuk. | Must |
+| US-18 | Sebagai penjual, saya ingin menandai menu "habis"/nonaktif sementara. **[Asumsi]** | Should |
+| US-19 | Sebagai penjual, saya ingin mendapat panduan singkat penggunaan dashboard. | Should |
+| US-20 | Sebagai penjual, saya ingin menolak/membatalkan pesanan jika tidak dapat dipenuhi. **[Asumsi]** | Could |
+
+---
+
+## 8. Alur Pengguna (User Flow)
+
+### 8.1 Alur utama (dari proposal)
+
+1. Mahasiswa membuka KantinQ dan memilih tenan.
+2. Mahasiswa memilih menu, menentukan porsi, dan menambahkan catatan ke keranjang.
+3. Mahasiswa melakukan pembayaran (simulasi) dan pesanan masuk ke antrean tenan.
+4. Penjual melihat pesanan di dashboard, lalu mengubah status menjadi **"Diproses"**.
+5. Setelah makanan siap, penjual mengubah status menjadi **"Selesai"** dan pembeli mendapat pembaruan.
+6. Mahasiswa mengambil makanan di tenan tanpa mengantre.
+
+### 8.2 Diagram alur
+
+```mermaid
+sequenceDiagram
+actor M as Mahasiswa
+participant A as Aplikasi KantinQ
+participant API as Backend API
+participant P as Dummy Payment
+actor J as Penjual (Dashboard)
+
+M->>A: Pilih tenan & menu, atur porsi + catatan
+A->>API: Sinkronisasi keranjang
+M->>A: Checkout
+A->>API: Buat pesanan
+API->>P: Simulasi pembayaran
+P-->>API: Berhasil
+API-->>A: Pesanan dibuat (status: Antrean)
+API-->>J: Pesanan baru masuk
+J->>API: Ubah status → Diproses
+API-->>A: Update status (polling/WebSocket)
+J->>API: Ubah status → Selesai
+API-->>A: Update status + notifikasi
+M->>J: Ambil makanan di tenan
+```
+
+### 8.3 Mesin status pesanan
+
+```mermaid
+stateDiagram-v2
+[*] --> MenungguPembayaran: Checkout
+MenungguPembayaran --> Antrean: Pembayaran berhasil
+MenungguPembayaran --> Gagal: Pembayaran gagal/kedaluwarsa
+Antrean --> Diproses: Penjual terima/proses
+Antrean --> Dibatalkan: Dibatalkan pembeli/penjual
+Diproses --> Selesai: Makanan siap
+Selesai --> [*]
+Gagal --> [*]
+Dibatalkan --> [*]
+```
+
+| Status | Arti | Pengubah | Terlihat oleh |
+|---|---|---|---|
+| Menunggu Pembayaran **[Asumsi]** | Pesanan dibuat, belum dibayar | Sistem | Pembeli |
+| **Antrean** | Pembayaran sukses, menunggu diproses penjual | Sistem | Pembeli, Penjual |
+| **Diproses** | Sedang disiapkan | Penjual | Pembeli, Penjual |
+| **Selesai** | Siap diambil | Penjual | Pembeli, Penjual |
+| Dibatalkan **[Asumsi]** | Dibatalkan sebelum diproses | Pembeli/Penjual | Pembeli, Penjual |
+| Gagal **[Asumsi]** | Pembayaran gagal | Sistem | Pembeli |
+
+**Aturan transisi:** hanya maju (Antrean → Diproses → Selesai). Penjual tidak dapat melompati status maupun memundurkan
+status **[Asumsi]**.
+
+### 8.4 Alur Penggunaan Rinci — Pembeli (Mahasiswa)
+
+#### 8.4.1 Alur pertama kali (onboarding, registrasi, login)
+
+| Langkah | Aksi Pengguna | Respons Sistem | Layar |
+|---|---|---|---|
+| 1 | Membuka aplikasi KantinQ pertama kali | Menampilkan splash dan pengenalan singkat **[Asumsi]** | B-01 |
+| 2 | Memilih **Daftar** dan mengisi nama, email/NIM, kata sandi | Memvalidasi input (format, kata sandi minimal 8
+karakter, email/NIM belum terdaftar) | B-02 |
+| 3 | Menekan **Daftar** | Membuat akun dengan peran `buyer`, mengeluarkan token, masuk otomatis | B-02 → B-03 |
+| 4 | (Pengguna lama) Mengisi kredensial lalu **Masuk** | Memverifikasi kredensial dan mengarahkan sesuai peran (pembeli
+ke B-03, penjual ke M-02) | B-02 |
+| 5 | Gagal masuk | Menampilkan pesan "Email/NIM atau kata sandi salah" tanpa membocorkan mana yang salah | B-02 |
+
+#### 8.4.2 Alur memesan (happy path)
+
+| Langkah | Aksi Pengguna | Respons Sistem | Layar |
+|---|---|---|---|
+| 1 | Melihat **beranda** berisi daftar tenan | Menampilkan kartu tenan dengan penanda Buka/Tutup | B-03 |
+| 2 | Memilih satu tenan | Memuat daftar menu, harga, dan stok tenan tersebut | B-04 |
+| 3 | Mengetuk menu yang diinginkan | Membuka modal/detail menu dengan pengatur porsi dan kolom catatan | B-05 |
+| 4 | Mengatur **jumlah porsi** (min. 1, maks. sesuai stok) dan menulis **catatan** (mis. "tidak pedas") | Menghitung
+subtotal langsung | B-05 |
+| 5 | Menekan **Tambah ke Keranjang** | Menyimpan item ke keranjang (sinkron ke server), badge keranjang bertambah |
+B-04 |
+| 6 | (Opsional) Menambah menu lain dari tenan yang sama | Mengulang langkah 3–5 | B-04, B-05 |
+| 7 | Membuka **Keranjang** | Menampilkan item, porsi, catatan, subtotal, dan total harga | B-06 |
+| 8 | (Opsional) Mengubah porsi, mengedit catatan, atau menghapus item | Menghitung ulang total secara otomatis | B-06 |
+| 9 | Menekan **Checkout** | Memvalidasi ulang stok dan harga, membuat pesanan berstatus *Menunggu Pembayaran*, dan
+mereservasi stok | B-06 → B-07 |
+| 10 | Meninjau ringkasan dan memilih metode pembayaran simulasi | Menampilkan label jelas bahwa ini **simulasi** | B-07
+|
+| 11 | Menekan **Bayar** | Dummy payment memproses dan mengembalikan hasil | B-07 |
+| 12 | Melihat hasil **pembayaran sukses** | Pesanan berstatus **Antrean**, menampilkan nomor/kode pesanan, dan pesanan
+muncul di dashboard tenan | B-08 |
+| 13 | Membuka **Status Pesanan** | Menampilkan stepper Antrean → Diproses → Selesai, diperbarui otomatis | B-09 |
+| 14 | Menunggu sambil beraktivitas lain (mis. kembali ke kelas) | Aplikasi memperbarui status lewat polling/WebSocket |
+B-09 |
+| 15 | Menerima notifikasi **"Pesanan Selesai"** | Menampilkan notifikasi in-app (push bila tersedia) dan status berubah
+menjadi Selesai | B-09 |
+| 16 | Mendatangi tenan dan menyebutkan **kode pesanan** | Penjual mencocokkan kode dan menyerahkan makanan, tanpa
+mengantre | — (di lokasi) |
+| 17 | (Opsional) Membuka **Riwayat Pesanan** | Menampilkan pesanan lampau beserta detailnya **[Asumsi]** | B-10 |
+
+#### 8.4.3 Diagram alur pembeli
+
+```mermaid
+flowchart TD
+A([Buka aplikasi]) --> B{Sudah login?}
+B -- Belum --> C[Daftar atau Masuk]
+C --> D
+B -- Sudah --> D[Beranda: daftar tenan]
+D --> E[Pilih tenan]
+E --> F[Lihat menu, harga, stok]
+F --> G{Stok tersedia?}
+G -- Habis --> F
+G -- Ada --> H[Atur porsi dan catatan]
+H --> I[Tambah ke keranjang]
+I --> J{Tambah menu lain?}
+J -- Ya --> F
+J -- Tidak --> K[Buka keranjang dan tinjau total]
+K --> L[Checkout]
+L --> M{Validasi stok dan harga lolos?}
+M -- Tidak --> N[Sesuaikan atau hapus item] --> K
+M -- Ya --> O[Pilih metode bayar simulasi]
+O --> P[Bayar]
+P --> Q{Hasil pembayaran}
+Q -- Gagal atau kedaluwarsa --> R[Pesanan batal, stok dikembalikan] --> S{Coba lagi?}
+S -- Ya --> O
+S -- Tidak --> D
+Q -- Sukses --> T[Status: Antrean]
+T --> U[Status: Diproses]
+U --> V[Status: Selesai dan notifikasi]
+V --> W[Ambil makanan di tenan dengan kode pesanan]
+W --> X([Selesai])
+```
+
+### 8.5 Alur Penggunaan Rinci — Penjual (Merchant)
+
+#### 8.5.1 Alur harian penjual
+
+| Langkah | Aksi Penjual | Respons Sistem | Layar |
+|---|---|---|---|
+| 1 | Masuk dengan akun penjual | Memverifikasi dan membuka dashboard tenan miliknya saja | M-01 → M-02 |
+| 2 | (Pertama kali) Melihat **panduan singkat** | Menampilkan tutorial langkah penggunaan dashboard | M-07 |
+| 3 | **Menyiapkan menu**: menambah menu baru (nama, harga, deskripsi, stok, foto opsional) | Menyimpan menu dan
+langsung tampil di aplikasi pembeli | M-04 → M-05 |
+| 4 | **Memperbarui stok** pagi hari sesuai bahan yang tersedia | Menyimpan stok; menu bersetok 0 otomatis tampil
+"Habis" bagi pembeli | M-04 / M-06 |
+| 5 | Membuka tenan (toggle **Buka**) **[Asumsi]** | Tenan dapat menerima pesanan | M-02 |
+| 6 | Menunggu pesanan masuk di **Dashboard Pesanan** | Pesanan baru muncul otomatis di kolom *Antrean* disertai
+penanda/bunyi | M-02 |
+| 7 | Membuka **detail pesanan** | Menampilkan kode pesanan, item, porsi, **catatan pembeli**, total, dan waktu masuk |
+M-03 |
+| 8 | Menekan **Proses** | Status menjadi **Diproses**, pembeli menerima pembaruan | M-02 / M-03 |
+| 9 | Menyiapkan makanan sesuai pesanan dan catatan | — | — |
+| 10 | Menekan **Selesai** setelah makanan siap (dengan konfirmasi) | Status menjadi **Selesai**, pembeli diberi
+notifikasi | M-02 / M-03 |
+| 11 | Pembeli datang menyebutkan kode, penjual mencocokkan dan menyerahkan makanan | Pesanan berpindah ke bagian
+selesai | — (di lokasi) |
+| 12 | Selama jam sibuk, memperbarui stok bila ada menu yang habis | Stok tersinkron; menu habis tidak bisa dipesan |
+M-04 |
+| 13 | (Opsional) Melihat ringkasan harian | Jumlah pesanan dan total penjualan simulasi **[Asumsi]** | M-02 |
+| 14 | Menutup tenan di akhir jam operasional **[Asumsi]** | Pesanan baru tidak diterima; pesanan aktif tetap dapat
+diselesaikan | M-02 |
+
+#### 8.5.2 Alur kelola menu dan stok
+
+```mermaid
+flowchart TD
+A([Masuk dashboard penjual]) --> B[Buka Kelola Menu]
+B --> C{Pilih aksi}
+C -- Tambah --> D[Isi form menu] --> E[Simpan]
+C -- Ubah --> F[Edit harga, deskripsi, stok] --> E
+C -- Ubah stok cepat --> G[Gunakan kontrol plus minus atau input langsung] --> E
+C -- Hapus --> H[Konfirmasi hapus] --> I[Soft delete menu]
+C -- Nonaktifkan --> J[Tandai habis atau nonaktif] --> E
+E --> K[Validasi: harga dan stok tidak negatif]
+K -- Tidak valid --> D
+K -- Valid --> L[Tersimpan dan tampil di aplikasi pembeli]
+I --> L
+```
+
+#### 8.5.3 Alur memproses pesanan
+
+```mermaid
+flowchart TD
+A([Pesanan baru masuk]) --> B[Penanda dan bunyi di dashboard]
+B --> C[Penjual membuka detail pesanan]
+C --> D{Bisa dipenuhi?}
+D -- Tidak --> E[Batalkan dengan alasan] --> F[Pembeli diberi tahu, stok dikembalikan]
+D -- Ya --> G[Tekan Proses: status Diproses]
+G --> H[Siapkan makanan]
+H --> I[Tekan Selesai: status Selesai]
+I --> J[Pembeli menerima notifikasi]
+J --> K[Pembeli datang dan menyebut kode pesanan]
+K --> L[Penjual menyerahkan makanan]
+L --> M([Pesanan tuntas])
+```
+
+### 8.6 Alur Alternatif dan Pengecualian
+
+| Kode | Skenario | Alur |
+|---|---|---|
+| AF-01 | **Stok habis saat checkout** | Sistem menolak item yang habis, menampilkan pesan, pembeli menyesuaikan jumlah
+atau menghapus item lalu checkout ulang. |
+| AF-02 | **Pembayaran gagal** | Pesanan tidak menjadi aktif, reservasi stok dilepas, pembeli dapat mencoba metode lain
+atau kembali ke keranjang (keranjang tetap tersimpan). |
+| AF-03 | **Pembayaran kedaluwarsa** | Pesanan `pending_payment` otomatis dibatalkan setelah batas waktu (mis. 10 menit)
+dan stok dikembalikan **[Asumsi]**. |
+| AF-04 | **Pembeli membatalkan pesanan** | Hanya bisa saat status Antrean; stok dikembalikan; penjual melihat pesanan
+berstatus Dibatalkan **[Asumsi]**. |
+| AF-05 | **Penjual membatalkan pesanan** | Penjual memilih alasan; pembeli menerima pemberitahuan **[Asumsi]**. |
+| AF-06 | **Tenan tutup** | Pembeli masih dapat melihat menu, tetapi tombol pesan dinonaktifkan dengan keterangan "Tenan
+sedang tutup". |
+| AF-07 | **Keranjang berisi item tenan lain** | Sistem meminta konfirmasi mengosongkan keranjang lama sebelum menambah
+item dari tenan baru. |
+| AF-08 | **Koneksi terputus** | Aplikasi menampilkan indikator offline, otomatis menyambung ulang, dan menyinkronkan
+status terbaru saat tersambung. |
+| AF-09 | **Aplikasi ditutup saat menunggu pesanan** | Saat dibuka kembali, aplikasi memuat pesanan aktif beserta status
+terkini dari server. |
+| AF-10 | **Sesi berakhir (token kedaluwarsa)** | Pengguna diarahkan ke login dan keranjang/pesanan tetap aman di
+server. |
+| AF-11 | **Penjual salah menekan status** | Aksi "Selesai" memakai dialog konfirmasi untuk mencegah salah tekan. |
+| AF-12 | **Pembeli tidak datang mengambil** | Di luar lingkup MVP; dicatat pada roadmap lanjutan. |
+
+### 8.7 Peta Navigasi Layar
+
+```mermaid
+flowchart LR
+subgraph Pembeli
+B01[B-01 Onboarding] --> B02[B-02 Login/Daftar]
+B02 --> B03[B-03 Daftar Tenan]
+B03 --> B04[B-04 Menu Tenan]
+B04 --> B05[B-05 Detail Menu]
+B05 --> B06[B-06 Keranjang]
+B04 --> B06
+B06 --> B07[B-07 Checkout dan Bayar]
+B07 --> B08[B-08 Hasil Pembayaran]
+B08 --> B09[B-09 Status Pesanan]
+B03 --> B10[B-10 Riwayat]
+B03 --> B11[B-11 Profil]
+B10 --> B09
+end
+subgraph Penjual
+M01[M-01 Login Penjual] --> M02[M-02 Dashboard Pesanan]
+M02 --> M03[M-03 Detail Pesanan]
+M02 --> M04[M-04 Kelola Menu]
+M04 --> M05[M-05 Form Menu]
+M02 --> M07[M-07 Panduan]
+end
+B02 -. peran penjual .-> M02
+```
+
+### 8.8 Ringkasan Interaksi Pembeli dan Penjual per Status
+
+| Status | Yang dilihat/dilakukan Pembeli | Yang dilihat/dilakukan Penjual |
+|---|---|---|
+| Menunggu Pembayaran | Menyelesaikan pembayaran simulasi | Belum terlihat di dashboard |
+| **Antrean** | Melihat nomor pesanan, menunggu; dapat membatalkan **[Asumsi]** | Pesanan baru muncul; menekan
+**Proses** atau membatalkan |
+| **Diproses** | Melihat bahwa makanan sedang disiapkan | Menyiapkan makanan; menekan **Selesai** bila siap |
+| **Selesai** | Menerima notifikasi, datang dan menyebut kode pesanan | Menyerahkan makanan sesuai kode |
+| Dibatalkan / Gagal | Melihat alasan dan dapat memesan ulang | Pesanan keluar dari antrean aktif |
+
+### 8.9 Alur End-to-End Lintas Peran (Swimlane)
+
+Diagram ini menyatukan tiga pelaku (Pembeli, Sistem, Penjual) dalam satu alur penuh dari membuka aplikasi sampai makanan
+diserahkan.
+
+```mermaid
+flowchart TB
+subgraph PB["PEMBELI"]
+P1([Buka aplikasi KantinQ]) --> P2[Pilih tenan dan menu]
+P2 --> P3[Atur porsi dan catatan]
+P3 --> P4[Tambah ke keranjang]
+P4 --> P5[Checkout]
+P6[Pilih metode dan bayar simulasi]
+P9[Pantau status pesanan]
+P10[Datang ke tenan dan sebut kode pesanan]
+P11([Makanan diterima tanpa antre])
+end
+
+subgraph SY["SISTEM"]
+S1{"Stok dan harga valid?"}
+S2[Buat pesanan dan reservasi stok]
+S3[Dummy payment gateway]
+S4{"Hasil pembayaran"}
+S5["Status Antrean dan stok dikurangi permanen"]
+S6["Pesanan gagal dan stok dilepas"]
+S7[Kirim pembaruan status ke pembeli]
+end
+
+subgraph PJ["PENJUAL"]
+J1[Pesanan baru muncul di dashboard]
+J2["Tekan Proses lalu status Diproses"]
+J3[Siapkan makanan]
+J4["Tekan Selesai lalu status Selesai"]
+J5[Cocokkan kode dan serahkan makanan]
+end
+
+P5 --> S1
+S1 -- Tidak --> P4
+S1 -- Ya --> S2
+S2 --> P6
+P6 --> S3
+S3 --> S4
+S4 -- Gagal atau kedaluwarsa --> S6
+S6 --> P5
+S4 -- Sukses --> S5
+S5 --> J1
+S5 --> P9
+J1 --> J2
+J2 --> S7
+J2 --> J3
+J3 --> J4
+J4 --> S7
+S7 --> P9
+P9 --> P10
+J4 --> P10
+P10 --> J5
+J5 --> P11
+```
+
+### 8.10 Alur Autentikasi dan Pengarahan Berdasarkan Peran
+
+```mermaid
+flowchart TD
+A([Aplikasi dibuka]) --> B{"Token tersimpan dan masih berlaku?"}
+B -- Ya --> C[Ambil profil dan peran dari server]
+B -- Tidak --> D[Tampilkan layar Login]
+D --> E{"Punya akun?"}
+E -- Belum --> F[Isi form registrasi pembeli]
+F --> G{"Validasi input lolos?"}
+G -- Tidak --> H[Tampilkan pesan kesalahan per kolom] --> F
+G -- Ya --> I["Buat akun dengan peran buyer"]
+I --> J[Terbitkan token]
+E -- Sudah --> K[Isi email atau NIM dan kata sandi]
+K --> L{"Kredensial benar?"}
+L -- Tidak --> M["Pesan: kredensial salah"] --> N{"Gagal berulang kali?"}
+N -- Ya --> O[Batasi percobaan sementara] --> D
+N -- Tidak --> K
+L -- Ya --> J
+J --> C
+C --> Q{"Peran pengguna"}
+Q -- buyer --> R[Beranda Pembeli B-03]
+Q -- seller --> S[Dashboard Penjual M-02]
+R --> T([Logout hapus token]) --> D
+S --> T
+```
+
+### 8.11 Alur Checkout, Reservasi Stok, dan Dummy Payment (Sequence)
+
+```mermaid
+sequenceDiagram
+autonumber
+actor B as Pembeli
+participant APP as Aplikasi
+participant API as Backend API
+participant DB as Database
+participant PAY as Dummy Payment
+actor J as Penjual
+
+B->>APP: Tekan Checkout
+APP->>API: POST /orders dengan idempotency key
+API->>DB: Mulai transaksi dan validasi stok serta harga
+alt Stok tidak mencukupi
+DB-->>API: Validasi gagal
+API-->>APP: 409 OUT_OF_STOCK
+APP-->>B: Tampilkan item bermasalah untuk disesuaikan
+else Stok mencukupi
+API->>DB: Buat order pending_payment dan reservasi stok
+DB-->>API: Order tersimpan
+API-->>APP: 201 order_id dan total
+B->>APP: Pilih metode lalu Bayar
+APP->>API: POST /payments
+API->>PAY: Buat transaksi simulasi
+PAY-->>API: transaction_id dan hasil
+alt Pembayaran sukses
+API->>DB: Payment success, order queued, stok final
+API-->>APP: Pembayaran sukses dan kode pesanan
+API-->>J: Event order.created
+APP-->>B: Tampilkan hasil sukses
+else Gagal atau kedaluwarsa
+API->>DB: Payment failed, order failed, stok dilepas
+API-->>APP: Pembayaran gagal
+APP-->>B: Tawarkan coba lagi
+end
+end
+```
+
+### 8.12 Status Pembayaran Simulasi
+
+```mermaid
+stateDiagram-v2
+[*] --> Pending: Pembayaran dibuat
+Pending --> Success: Simulasi sukses
+Pending --> Failed: Simulasi gagal
+Pending --> Expired: Melewati batas waktu
+Success --> [*]
+Failed --> Pending: Pembeli coba lagi
+Failed --> [*]
+Expired --> [*]
+```
+
+### 8.13 Alur Pembaruan Status Real-Time (Polling dan WebSocket)
+
+```mermaid
+sequenceDiagram
+autonumber
+actor J as Penjual
+participant API as Backend API
+participant DB as Database
+participant WS as WebSocket
+participant APP as Aplikasi Pembeli
+actor B as Pembeli
+
+J->>API: PATCH /seller/orders/id/status menjadi processing
+API->>DB: Validasi transisi lalu simpan dan catat log
+DB-->>API: Tersimpan
+API-->>J: 200 OK
+
+alt Mode WebSocket
+API->>WS: Publikasikan order.status_changed
+WS-->>APP: Push event ke channel order id
+APP-->>B: Stepper berubah ke Diproses
+else Mode Polling
+loop Setiap 3 sampai 10 detik hingga status final
+APP->>API: GET /orders/id
+API-->>APP: Status terbaru
+end
+APP-->>B: Stepper berubah saat status berbeda
+end
+
+J->>API: PATCH status menjadi done
+API->>DB: Simpan status Selesai
+API-->>APP: Event atau hasil polling
+APP-->>B: Notifikasi Pesanan Selesai
+Note over APP: Polling dihentikan karena status final
+```
+
+### 8.14 Alur Pembatalan Pesanan
+
+```mermaid
+flowchart TD
+A([Permintaan pembatalan]) --> B{"Dibatalkan oleh siapa?"}
+B -- Pembeli --> C{"Status saat ini?"}
+C -- Antrean --> D[Ubah status menjadi Dibatalkan]
+C -- Diproses atau Selesai --> E["Tolak: sudah diproses, hubungi penjual"]
+B -- Penjual --> F[Pilih alasan pembatalan]
+F --> G{"Status saat ini?"}
+G -- Antrean atau Diproses --> D
+G -- Selesai --> H[Tolak: pesanan sudah selesai]
+D --> I[Kembalikan stok ke menu]
+I --> J[Catat di log status]
+J --> K[Kirim notifikasi ke pihak lain]
+K --> L([Pesanan keluar dari antrean aktif])
+E --> M([Selesai tanpa perubahan])
+H --> M
+```
+
+### 8.15 Alur Reservasi dan Pengembalian Stok Otomatis
+
+```mermaid
+flowchart TD
+A([Checkout dibuat]) --> B[Reservasi stok sesuai qty]
+B --> C[Order pending_payment dan mulai timer kedaluwarsa]
+C --> D{"Pembayaran sebelum timer habis?"}
+D -- Sukses --> E[Konfirmasi pengurangan stok]
+E --> F[Order menjadi Antrean]
+D -- Gagal --> G[Lepas reservasi stok]
+D -- Timer habis --> H[Order dikedaluwarsakan oleh job otomatis]
+H --> G
+G --> I[Stok kembali tersedia]
+F --> J{"Dibatalkan sebelum Diproses?"}
+J -- Ya --> G
+J -- Tidak --> K[Stok tetap berkurang]
+I --> L([Menu bisa dipesan lagi])
+K --> M([Alur pesanan berlanjut])
+```
+
+### 8.16 Alur Penjual Sepanjang Hari Operasional
+
+```mermaid
+flowchart TD
+A([Mulai hari operasional]) --> B[Login dan buka dashboard]
+B --> C[Perbarui stok dan harga menu]
+C --> D[Buka tenan]
+D --> E{"Ada pesanan baru?"}
+E -- Belum --> F[Tunggu dan pantau dashboard]
+F --> E
+E -- Ada --> G[Terima notifikasi dan bunyi]
+G --> H[Buka detail dan baca catatan pembeli]
+H --> I{"Dapat dipenuhi?"}
+I -- Tidak --> J[Batalkan dengan alasan] --> E
+I -- Ya --> K[Ubah status Diproses]
+K --> L[Siapkan makanan]
+L --> M["Konfirmasi dan ubah status Selesai"]
+M --> N[Serahkan makanan saat pembeli datang]
+N --> O{"Stok menu menipis atau habis?"}
+O -- Ya --> P[Perbarui stok atau tandai habis] --> E
+O -- Tidak --> E
+E --> Q{"Jam operasional selesai?"}
+Q -- Belum --> E
+Q -- Sudah --> R[Tutup tenan]
+R --> S[Lihat ringkasan harian]
+S --> T([Selesai])
+```
+
+### 8.17 Penanganan Gangguan Koneksi di Aplikasi Pembeli
+
+```mermaid
+flowchart TD
+A([Pembeli memantau status pesanan]) --> B{"Koneksi tersedia?"}
+B -- Ya --> C[Terima pembaruan real-time atau polling]
+C --> D{"Status final?"}
+D -- Belum --> B
+D -- Selesai --> E[Tampilkan notifikasi dan hentikan polling]
+B -- Tidak --> F[Tampilkan indikator offline]
+F --> G[Coba sambung ulang dengan jeda bertahap]
+G --> H{"Tersambung kembali?"}
+H -- Tidak --> G
+H -- Ya --> I[Ambil status terakhir dari server]
+I --> J[Sinkronkan tampilan stepper]
+J --> B
+E --> K([Selesai])
+```
+
+### 8.18 Perjalanan Pengguna (User Journey)
+
+```mermaid
+journey
+title Perjalanan Pembeli saat Jam Istirahat
+section Sebelum istirahat
+Buka KantinQ dari ruang kelas: 4: Pembeli
+Pilih tenan dan menu: 5: Pembeli
+Atur porsi dan catatan: 4: Pembeli
+section Memesan
+Checkout dan bayar simulasi: 4: Pembeli, Sistem
+Pesanan masuk antrean tenan: 5: Sistem
+section Menunggu
+Pantau status pesanan: 4: Pembeli
+Penjual memproses dan menyelesaikan: 5: Penjual
+Terima notifikasi Selesai: 5: Pembeli
+section Mengambil
+Sebut kode pesanan di tenan: 5: Pembeli, Penjual
+Terima makanan tanpa antre: 5: Pembeli
+```
+
+```mermaid
+journey
+title Perjalanan Penjual saat Jam Sibuk
+section Persiapan
+Perbarui menu dan stok: 4: Penjual
+Buka tenan: 5: Penjual
+section Melayani
+Pesanan masuk otomatis: 5: Penjual, Sistem
+Proses pesanan sesuai catatan: 4: Penjual
+Tandai pesanan Selesai: 5: Penjual
+section Penutupan
+Perbarui stok yang habis: 3: Penjual
+Lihat ringkasan harian: 4: Penjual
+```
+
+> **Catatan render:** Seluruh diagram ditulis dalam sintaks Mermaid standar sehingga tampil otomatis di GitHub, GitLab,
+Notion, Obsidian, VS Code (dengan ekstensi Markdown Preview Mermaid Support), dan editor Markdown lain yang mendukung
+Mermaid. Jika editor tidak mendukung, tempel kode diagram ke [mermaid.live](https://mermaid.live) untuk menghasilkan
+gambar.
+
+---
+
+## 9. Kebutuhan Fungsional
+
+**Skala prioritas (MoSCoW):** Must = wajib untuk rilis; Should = penting, ditargetkan; Could = bila waktu memungkinkan.
+
+### 9.1 Autentikasi dan Peran (FR-AUT)
+
+| ID | Kebutuhan | Prioritas |
+|---|---|---|
+| FR-AUT-01 | Sistem menyediakan registrasi dan login untuk pembeli. | Must |
+| FR-AUT-02 | Sistem menyediakan login untuk penjual yang terkait dengan satu tenan. | Must |
+| FR-AUT-03 | Sistem memisahkan hak akses berdasarkan peran (pembeli vs. penjual); penjual hanya dapat mengakses data
+tenannya sendiri. | Must |
+| FR-AUT-04 | Sesi dipertahankan menggunakan token (mis. JWT) dengan masa berlaku. **[Asumsi]** | Must |
+| FR-AUT-05 | Logout menghapus sesi lokal. | Must |
+
+### 9.2 Daftar Tenan (FR-TNN)
+
+| ID | Kebutuhan | Prioritas |
+|---|---|---|
+| FR-TNN-01 | Aplikasi menampilkan daftar semua tenan aktif (nama, deskripsi singkat/gambar, status buka/tutup). | Must
+|
+| FR-TNN-02 | Pembeli dapat membuka tenan untuk melihat daftar menunya. | Must |
+| FR-TNN-03 | Tenan yang tutup/tidak aktif tetap tampil dengan penanda, dan tidak dapat menerima pesanan. **[Asumsi]** |
+Should |
+| FR-TNN-04 | Pencarian tenan/menu berdasarkan kata kunci. **[Asumsi]** | Could |
+
+### 9.3 Menu dan Stok — Sisi Pembeli (FR-MNU)
+
+| ID | Kebutuhan | Prioritas |
+|---|---|---|
+| FR-MNU-01 | Menu menampilkan nama, harga, deskripsi, foto (opsional), dan ketersediaan stok. | Must |
+| FR-MNU-02 | Menu dengan stok 0 ditandai "Habis" dan tidak dapat ditambahkan ke keranjang. | Must |
+| FR-MNU-03 | Indikator stok menipis (mis. sisa ≤ 5) ditampilkan. **[Asumsi]** | Could |
+
+### 9.4 Keranjang (FR-KRJ)
+
+| ID | Kebutuhan | Prioritas |
+|---|---|---|
+| FR-KRJ-01 | Pembeli dapat menambah menu ke keranjang. | Must |
+| FR-KRJ-02 | Pembeli dapat mengubah jumlah porsi per item (min. 1, maks. sesuai stok). | Must |
+| FR-KRJ-03 | Pembeli dapat menambahkan **catatan** per item atau per pesanan (mis. "tidak pedas"). | Must |
+| FR-KRJ-04 | Sistem menghitung dan menampilkan subtotal per item serta total harga secara otomatis. | Must |
+| FR-KRJ-05 | Pembeli dapat menghapus item dari keranjang. | Must |
+| FR-KRJ-06 | Satu keranjang/pesanan hanya berisi item dari **satu tenan**. **[Asumsi]** (Menyederhanakan alur
+pembayaran dan antrean per tenan; jika pembeli menambah dari tenan lain, sistem meminta konfirmasi untuk mengosongkan
+keranjang.) | Must |
+| FR-KRJ-07 | Keranjang tersinkronisasi dengan server (Keranjang API) dan bertahan saat aplikasi ditutup/dibuka kembali.
+| Should |
+| FR-KRJ-08 | Validasi ulang stok dan harga saat checkout. | Must |
+
+### 9.5 Checkout dan Dummy Payment (FR-PAY)
+
+| ID | Kebutuhan | Prioritas |
+|---|---|---|
+| FR-PAY-01 | Pembeli dapat melakukan checkout dari keranjang dan melihat ringkasan pesanan. | Must |
+| FR-PAY-02 | Sistem menyediakan **dummy payment gateway** yang mensimulasikan transaksi: sukses, gagal, dan
+kedaluwarsa. | Must |
+| FR-PAY-03 | Pembayaran sukses membuat pesanan berstatus **Antrean** dan meneruskannya ke dashboard tenan. | Must |
+| FR-PAY-04 | Pembayaran gagal tidak membuat pesanan aktif dan tidak mengurangi stok permanen. | Must |
+| FR-PAY-05 | Antarmuka pembayaran diberi label jelas bahwa ini **simulasi** (tidak ada uang sungguhan). | Must |
+| FR-PAY-06 | Metode pembayaran simulasi (mis. QRIS-dummy, e-wallet-dummy, tunai di tempat) dapat dipilih. **[Asumsi]**
+| Could |
+| FR-PAY-07 | Nomor/ID transaksi unik dibuat untuk setiap percobaan pembayaran. | Must |
+
+### 9.6 Status Pesanan — Sisi Pembeli (FR-STS)
+
+| ID | Kebutuhan | Prioritas |
+|---|---|---|
+| FR-STS-01 | Pembeli melihat status pesanan aktif: Antrean, Diproses, Selesai. | Must |
+| FR-STS-02 | Status diperbarui hampir *real-time* melalui WebSocket atau polling interval pendek. | Must |
+| FR-STS-03 | Pembeli mendapat pemberitahuan (in-app; push bila memungkinkan) saat status berubah menjadi Selesai. |
+Must |
+| FR-STS-04 | Pesanan menampilkan nomor pesanan/kode ambil yang mudah disebut ke penjual. **[Asumsi]** | Should |
+| FR-STS-05 | Riwayat pesanan yang telah selesai dapat dilihat. **[Asumsi]** | Should |
+| FR-STS-06 | Pembeli dapat membatalkan pesanan selama status masih Antrean. **[Asumsi]** | Could |
+
+### 9.7 Dashboard Penjual — Pesanan (FR-DSB)
+
+| ID | Kebutuhan | Prioritas |
+|---|---|---|
+| FR-DSB-01 | Dashboard menampilkan daftar pesanan masuk tenan, terurut waktu (terlama di atas), dikelompokkan per
+status. | Must |
+| FR-DSB-02 | Tiap pesanan menampilkan nomor, daftar item, jumlah porsi, catatan, total, dan waktu masuk. | Must |
+| FR-DSB-03 | Penjual dapat mengubah status: Antrean → Diproses → Selesai. | Must |
+| FR-DSB-04 | Pesanan baru muncul otomatis tanpa muat ulang manual (WebSocket/polling) dan disertai penanda/bunyi.
+**[Asumsi: bunyi]** | Must |
+| FR-DSB-05 | Penjual dapat membatalkan pesanan dengan alasan. **[Asumsi]** | Could |
+| FR-DSB-06 | Ringkasan harian sederhana (jumlah pesanan, total penjualan simulasi). **[Asumsi]** | Could |
+| FR-DSB-07 | Panduan singkat penggunaan tersedia di dashboard (mitigasi risiko penjual kurang familiar). | Should |
+
+### 9.8 Dashboard Penjual — Manajemen Menu dan Stok (FR-MNG)
+
+| ID | Kebutuhan | Prioritas |
+|---|---|---|
+| FR-MNG-01 | Penjual dapat **menambah** menu (nama, harga, deskripsi, stok, foto opsional). | Must |
+| FR-MNG-02 | Penjual dapat **melihat** daftar menu tenannya. | Must |
+| FR-MNG-03 | Penjual dapat **mengubah** data menu (harga, stok, deskripsi). | Must |
+| FR-MNG-04 | Penjual dapat **menghapus** menu (soft delete; riwayat pesanan lama tidak rusak). | Must |
+| FR-MNG-05 | Penjual dapat memperbarui stok dengan cepat (kontrol +/− atau input langsung). | Must |
+| FR-MNG-06 | Stok berkurang **otomatis** saat pesanan berhasil masuk. | Must |
+| FR-MNG-07 | Penjual dapat menandai menu aktif/nonaktif atau tenan buka/tutup. **[Asumsi]** | Should |
+
+### 9.9 Notifikasi (FR-NTF) **[Asumsi — turunan dari FR-STS-03]**
+
+| ID | Kebutuhan | Prioritas |
+|---|---|---|
+| FR-NTF-01 | Notifikasi in-app saat status pesanan berubah. | Must |
+| FR-NTF-02 | Push notification (mis. FCM) saat pesanan Selesai. | Could |
+
+---
+
+## 10. Kebutuhan Non-Fungsional
+
+| ID | Kategori | Kebutuhan |
+|---|---|---|
+| NFR-01 | **Kinerja** | Waktu muat daftar tenan/menu ≤ 3 detik pada jaringan kampus normal. **[Asumsi]** |
+| NFR-02 | **Kinerja** | Pembaruan status pesanan tampil di pembeli dalam waktu singkat (target ≤ 5 detik WebSocket;
+polling interval ≤ 10 detik). |
+| NFR-03 | **Skalabilitas** | Sistem mampu menangani lonjakan pesanan pada jam istirahat; diverifikasi lewat uji beban
+sederhana (mis. 50–100 pengguna konkuren). **[Asumsi: angka]** |
+| NFR-04 | **Konsistensi data** | Pengurangan stok bersifat atomik untuk mencegah *overselling* saat pesanan bersamaan.
+|
+| NFR-05 | **Keamanan** | Kata sandi di-*hash* (mis. bcrypt/argon2); komunikasi melalui HTTPS; otorisasi berbasis peran
+di sisi server. |
+| NFR-06 | **Keamanan** | Validasi input di server (anti injeksi), pembatasan laju (*rate limiting*) pada endpoint
+autentikasi. **[Asumsi]** |
+| NFR-07 | **Privasi** | Data pribadi yang dikumpulkan minimal (nama, email/NIM, kredensial); tidak ada data
+kartu/rekening nyata karena pembayaran simulasi. |
+| NFR-08 | **Usability** | Antarmuka penjual sederhana, dapat dioperasikan dengan sedikit pelatihan; elemen sentuh
+berukuran memadai (≥ 44 dp). |
+| NFR-09 | **Usability** | Alur pemesanan dapat diselesaikan dalam ≤ 5 langkah utama dari pembukaan aplikasi.
+**[Asumsi]** |
+| NFR-10 | **Kompatibilitas** | Berjalan pada Android (versi minimal ditentukan tim, mis. Android 8+) dan/atau iOS
+sesuai framework yang dipilih. **[Asumsi]** |
+| NFR-11 | **Ketersediaan** | Aplikasi menangani kehilangan koneksi dengan pesan jelas dan mencoba menyambung ulang
+(WebSocket reconnect / lanjut polling). |
+| NFR-12 | **Keandalan** | Pesanan yang telah dibayar tidak hilang akibat kegagalan jaringan (idempotensi pada pembuatan
+pesanan). |
+| NFR-13 | **Maintainability** | Kode terstruktur, ber-versi di Git, API terdokumentasi (mis. OpenAPI/Postman). |
+| NFR-14 | **Aksesibilitas** | Kontras warna memadai, label teks pada ikon, ukuran font dapat dibaca. **[Asumsi]** |
+| NFR-15 | **Lokalisasi** | Bahasa antarmuka Bahasa Indonesia; mata uang Rupiah (Rp) dengan format pemisah ribuan.
+**[Asumsi]** |
+
+---
+
+## 11. Aturan Bisnis
+
+| ID | Aturan |
+|---|---|
+| BR-01 | Setiap pesanan terikat pada tepat satu tenan. **[Asumsi]** |
+| BR-02 | Stok berkurang otomatis ketika pembayaran berhasil dan pesanan berstatus Antrean (atau saat reservasi stok
+pada checkout — lihat Bagian 16.2). |
+| BR-03 | Menu dengan stok 0 tidak dapat dipesan. |
+| BR-04 | Total harga = Σ (harga satuan × jumlah porsi). Tidak ada pajak/biaya layanan pada rilis ini. **[Asumsi]** |
+| BR-05 | Harga pada pesanan adalah *snapshot* saat checkout, sehingga perubahan harga setelahnya tidak memengaruhi
+pesanan lama. |
+| BR-06 | Status pesanan hanya dapat berubah maju sesuai mesin status (Bagian 8.3). |
+| BR-07 | Hanya penjual pemilik tenan yang dapat mengubah status pesanan dan menu tenan tersebut. |
+| BR-08 | Pembatalan hanya diperbolehkan sebelum status Diproses. **[Asumsi]** |
+| BR-09 | Pembayaran bersifat simulasi; tidak ada transfer dana nyata. |
+| BR-10 | Pesanan yang tidak dibayar dalam batas waktu (mis. 10 menit) otomatis kedaluwarsa dan stok dikembalikan.
+**[Asumsi]** |
+
+---
+
+## 12. Rancangan Antarmuka (UI)
+
+Desain dibuat di **Figma** (Minggu 2) dan menjadi acuan implementasi Tahap UI.
+
+### 12.1 Daftar layar
+
+**Aplikasi Pembeli**
+
+| Kode | Layar | Isi Utama |
+|---|---|---|
+| B-01 | Splash / Onboarding **[Asumsi]** | Pengenalan singkat |
+| B-02 | Login / Registrasi | Form kredensial, pilihan peran |
+| B-03 | Beranda — Daftar Tenan | Kartu tenan, status buka/tutup, pencarian |
+| B-04 | Detail Tenan — Daftar Menu | Menu, harga, stok, tombol tambah |
+| B-05 | Detail Menu / Modal Tambah | Pilih porsi, catatan |
+| B-06 | Keranjang | Item, porsi, catatan, total harga, tombol Checkout |
+| B-07 | Checkout & Pembayaran (simulasi) | Ringkasan, pilihan metode dummy, konfirmasi |
+| B-08 | Hasil Pembayaran | Sukses/gagal, nomor pesanan |
+| B-09 | Status Pesanan | Stepper: Antrean → Diproses → Selesai |
+| B-10 | Riwayat Pesanan **[Asumsi]** | Daftar pesanan lampau |
+| B-11 | Profil **[Asumsi]** | Data akun, logout |
+
+**Tampilan Penjual (Merchant)**
+
+| Kode | Layar | Isi Utama |
+|---|---|---|
+| M-01 | Login Penjual | Kredensial |
+| M-02 | Dashboard Pesanan | Kolom/tab: Antrean, Diproses, Selesai; tombol ubah status |
+| M-03 | Detail Pesanan | Item, porsi, catatan, aksi |
+| M-04 | Kelola Menu | Daftar menu, tambah/ubah/hapus |
+| M-05 | Form Menu | Nama, harga, deskripsi, stok, foto |
+| M-06 | Kelola Stok **[Asumsi: gabungan M-04]** | Pembaruan stok cepat |
+| M-07 | Panduan Singkat | Tutorial penggunaan |
+
+### 12.2 Prinsip desain
+- **Sederhana dan cepat:** minim langkah, tombol aksi utama menonjol.
+- **Status jelas:** warna dan ikon konsisten per status (mis. abu = Antrean, kuning = Diproses, hijau = Selesai).
+**[Asumsi]**
+- **Dashboard penjual:** teks besar, kontras tinggi, dapat digunakan cepat saat ramai.
+- **Umpan balik:** indikator *loading*, pesan error ramah, konfirmasi aksi penting.
+
+### 12.3 Wireframe konseptual (teks)
+
+```
+[Keranjang]
++--------------------------------------+
+| < Keranjang Tenan: Nasi Bu Sri| |--------------------------------------| | Nasi Ayam Geprek [-] 2 [+] Rp 30.000 | |
+    Catatan: tidak pedas | | Es Teh [-] 1 [+] Rp 5.000 | |--------------------------------------| | Total Rp 35.000| | [
+    Bayar (Simulasi) ] | +--------------------------------------+ ``` --- ## 13. Arsitektur dan Rancangan Teknis>
+    Proposal menyatakan bagian ini sebagai **usulan awal** yang disesuaikan dengan keahlian tim. Pilihan final
+    ditetapkan pada Minggu 1 (lihat Bagian 20).
+
+    ### 13.1 Usulan tumpukan teknologi
+
+    | Lapisan | Opsi dalam Proposal | Catatan |
+    |---|---|---|
+    | Frontend | Flutter / React / React Native | Karena mata kuliah *Mobile Technology*, disarankan **Flutter atau
+    React Native** untuk aplikasi pembeli. Tampilan merchant dapat berupa layar terpisah dalam aplikasi yang sama
+    (role-based) atau web. |
+    | Backend & API | Node.js (Express) / Laravel, REST API | |
+    | Basis data | MySQL / PostgreSQL | PostgreSQL/MySQL sama-sama mendukung transaksi untuk stok atomik. |
+    | Pembaruan status | Polling berkala atau WebSocket | Rekomendasi: mulai dari polling (lebih mudah), tingkatkan ke
+    WebSocket bila waktu cukup. |
+    | Autentikasi | Peran terpisah pembeli dan penjual | JWT + RBAC **[Asumsi]** |
+    | Desain | Figma | |
+
+    ### 13.2 Arsitektur tingkat tinggi
+
+    ```mermaid
+    flowchart LR
+    subgraph Client
+    B[Aplikasi Pembeli]
+    M[Tampilan Merchant]
+    end
+    subgraph Server
+    GW[REST API]
+    WS[WebSocket / Polling Endpoint]
+    PAY[Dummy Payment Service]
+    DB[(Database)]
+    end
+    B -->|HTTPS| GW
+    M -->|HTTPS| GW
+    B <-->|status| WS
+        M <-->|pesanan baru| WS
+            GW --> DB
+            GW --> PAY
+            WS --> DB
+            ```
+
+            ### 13.3 Pembaruan status: Polling vs WebSocket
+
+            | Aspek | Polling | WebSocket |
+            |---|---|---|
+            | Kompleksitas | Rendah | Sedang |
+            | Latensi | Bergantung interval (3–10 dtk) | Hampir instan |
+            | Beban server | Lebih tinggi pada banyak klien | Lebih efisien |
+            | Rekomendasi MVP | ✅ Cukup untuk lulus indikator | Peningkatan bila waktu ada |
+
+            ### 13.4 Strategi sinkronisasi keranjang
+            Keranjang disimpan di server (per pengguna) dan di *state* lokal. Setiap perubahan dikirim ke Keranjang API;
+            saat aplikasi dibuka, keranjang dimuat ulang dari server. Konflik diselesaikan dengan prinsip *server wins*
+            untuk stok/harga terbaru.
+
+            ### 13.5 Dummy Payment Gateway
+            Layanan internal yang meniru gateway pembayaran:
+            - Menerima permintaan pembayaran (`order_id`, `amount`, `method`).
+            - Mengembalikan `transaction_id` dan hasil: `success`, `failed`, atau `expired`.
+            - Hasil dapat ditentukan secara deterministik untuk pengujian (mis. berdasarkan nominal atau parameter uji)
+            **[Asumsi]**.
+            - Menyediakan *callback/webhook* internal untuk memperbarui status pembayaran.
+
+            ---
+
+            ## 14. Model Data
+
+            ### 14.1 ERD
+
+            ```mermaid
+            erDiagram
+            USER ||--o{ ORDER : "membuat"
+            USER ||--o| STALL : "memiliki (penjual)"
+            STALL ||--o{ MENU_ITEM : "memiliki"
+            STALL ||--o{ ORDER : "menerima"
+            USER ||--o| CART : "memiliki"
+            CART ||--o{ CART_ITEM : "berisi"
+            MENU_ITEM ||--o{ CART_ITEM : "dirujuk"
+            ORDER ||--|{ ORDER_ITEM : "berisi"
+            MENU_ITEM ||--o{ ORDER_ITEM : "dirujuk"
+            ORDER ||--o{ PAYMENT : "dibayar via"
+            ORDER ||--o{ ORDER_STATUS_LOG : "riwayat status"
+            ```
+
+            ### 14.2 Definisi entitas **[Asumsi — skema usulan]**
+
+            **users**
+
+            | Kolom | Tipe | Keterangan |
+            |---|---|---|
+            | id | UUID/INT PK | |
+            | name | VARCHAR | |
+            | email / nim | VARCHAR UNIQUE | Identitas login |
+            | password_hash | VARCHAR | |
+            | role | ENUM('buyer','seller') | |
+            | created_at | TIMESTAMP | |
+
+            **stalls**
+
+            | Kolom | Tipe | Keterangan |
+            |---|---|---|
+            | id | PK | |
+            | owner_id | FK → users | Penjual pemilik |
+            | name | VARCHAR | |
+            | description | TEXT | |
+            | image_url | VARCHAR NULL | |
+            | is_open | BOOLEAN | |
+
+            **menu_items**
+
+            | Kolom | Tipe | Keterangan |
+            |---|---|---|
+            | id | PK | |
+            | stall_id | FK → stalls | |
+            | name | VARCHAR | |
+            | description | TEXT | |
+            | price | INT (Rupiah) | ≥ 0 |
+            | stock | INT | ≥ 0 |
+            | image_url | VARCHAR NULL | |
+            | is_active | BOOLEAN | Untuk soft delete/nonaktif |
+            | updated_at | TIMESTAMP | |
+
+            **carts / cart_items**
+
+            | Kolom | Tipe | Keterangan |
+            |---|---|---|
+            | carts.id, user_id, stall_id | PK, FK, FK | Satu keranjang aktif per pengguna |
+            | cart_items.id, cart_id, menu_item_id | PK, FK, FK | |
+            | cart_items.qty | INT | ≥ 1 |
+            | cart_items.note | VARCHAR NULL | Catatan item |
+
+            **orders**
+
+            | Kolom | Tipe | Keterangan |
+            |---|---|---|
+            | id | PK | |
+            | order_code | VARCHAR UNIQUE | Kode ambil yang mudah dibaca, mis. "A-014" |
+            | buyer_id | FK → users | |
+            | stall_id | FK → stalls | |
+            | status | ENUM('pending_payment','queued','processing','done','cancelled','failed') | |
+            | note | VARCHAR NULL | Catatan pesanan |
+            | total_amount | INT | Snapshot |
+            | created_at, updated_at | TIMESTAMP | |
+
+            **order_items**
+
+            | Kolom | Tipe | Keterangan |
+            |---|---|---|
+            | id, order_id, menu_item_id | PK, FK, FK | |
+            | name_snapshot | VARCHAR | Nama saat dipesan |
+            | price_snapshot | INT | Harga saat dipesan |
+            | qty | INT | |
+            | note | VARCHAR NULL | |
+
+            **payments**
+
+            | Kolom | Tipe | Keterangan |
+            |---|---|---|
+            | id | PK | |
+            | order_id | FK | |
+            | transaction_id | VARCHAR UNIQUE | Dari dummy gateway |
+            | method | VARCHAR | Metode simulasi |
+            | amount | INT | |
+            | status | ENUM('pending','success','failed','expired') | |
+            | created_at | TIMESTAMP | |
+
+            **order_status_logs**
+
+            | Kolom | Tipe | Keterangan |
+            |---|---|---|
+            | id, order_id | PK, FK | |
+            | from_status, to_status | ENUM | |
+            | changed_by | FK → users NULL | NULL jika oleh sistem |
+            | changed_at | TIMESTAMP | |
+
+            ---
+
+            ## 15. Spesifikasi API
+
+            > **[Asumsi]** Rancangan endpoint usulan (REST, JSON, prefix `/api/v1`). Tahap implementasi API di Minggu
+            5–6 mencakup: **Menu Tenan (CRUD)**, **Keranjang API**, **Update Status**, **Dummy Payment**.
+
+            ### 15.1 Konvensi
+            - Header autentikasi: `Authorization: Bearer <token>`.
+                - Format error seragam:
+
+                ```json
+                { "error": { "code": "OUT_OF_STOCK", "message": "Stok Nasi Ayam tidak mencukupi", "details": {} } }
+                ```
+
+                - Kode HTTP: `200/201` sukses, `400` validasi, `401` belum login, `403` tidak berhak, `404` tidak
+                ditemukan, `409` konflik (stok/status), `422` gagal bisnis, `500` error server.
+
+                ### 15.2 Autentikasi
+
+                | Method | Endpoint | Deskripsi | Peran |
+                |---|---|---|---|
+                | POST | `/auth/register` | Registrasi pembeli | Publik |
+                | POST | `/auth/login` | Login, mengembalikan token + peran | Publik |
+                | GET | `/auth/me` | Profil pengguna saat ini | Semua |
+
+                ### 15.3 Tenan dan Menu (Layanan "Menu Tenan")
+
+                | Method | Endpoint | Deskripsi | Peran |
+                |---|---|---|---|
+                | GET | `/stalls` | Daftar tenan | Pembeli |
+                | GET | `/stalls/{id}` | Detail tenan | Pembeli |
+                | GET | `/stalls/{id}/menu` | Daftar menu + stok | Pembeli |
+                | GET | `/seller/menu` | Menu tenan milik penjual | Penjual |
+                | POST | `/seller/menu` | **Tambah** menu | Penjual |
+                | PUT/PATCH | `/seller/menu/{id}` | **Ubah** menu/harga | Penjual |
+                | PATCH | `/seller/menu/{id}/stock` | Ubah stok cepat | Penjual |
+                | DELETE | `/seller/menu/{id}` | **Hapus** menu (soft delete) | Penjual |
+                | PATCH | `/seller/stall` | Buka/tutup tenan | Penjual |
+
+                Contoh `POST /seller/menu`:
+
+                ```json
+                // Request
+                { "name": "Nasi Ayam Geprek", "price": 15000, "stock": 40, "description": "Ayam geprek + nasi" }
+                // Response 201
+                { "id": 12, "stall_id": 3, "name": "Nasi Ayam Geprek", "price": 15000, "stock": 40, "is_active": true }
+                ```
+
+                ### 15.4 Keranjang (Layanan "Keranjang API")
+
+                | Method | Endpoint | Deskripsi |
+                |---|---|---|
+                | GET | `/cart` | Ambil keranjang aktif + total terhitung |
+                | POST | `/cart/items` | Tambah item `{menu_item_id, qty, note}` |
+                | PATCH | `/cart/items/{id}` | Ubah qty/catatan |
+                | DELETE | `/cart/items/{id}` | Hapus item |
+                | DELETE | `/cart` | Kosongkan keranjang |
+
+                Contoh respons `GET /cart`:
+
+                ```json
+                {
+                "stall": { "id": 3, "name": "Warung Bu Sri" },
+                "items": [
+                { "id": 1, "menu_item_id": 12, "name": "Nasi Ayam Geprek", "price": 15000, "qty": 2, "note": "tidak
+                pedas", "subtotal": 30000 }
+                ],
+                "total": 30000
+                }
+                ```
+
+                ### 15.5 Pesanan dan Pembayaran (Layanan "Dummy Payment")
+
+                | Method | Endpoint | Deskripsi | Peran |
+                |---|---|---|---|
+                | POST | `/orders` | Checkout: buat pesanan dari keranjang (status `pending_payment`), mereservasi stok
+                | Pembeli |
+                | POST | `/payments` | Mulai pembayaran simulasi `{order_id, method}` | Pembeli |
+                | POST | `/payments/{id}/simulate` | Menetapkan hasil simulasi `success/failed/expired` | Pembeli/Dev |
+                | GET | `/orders` | Riwayat pesanan pembeli | Pembeli |
+                | GET | `/orders/{id}` | Detail + status pesanan | Pembeli |
+                | POST | `/orders/{id}/cancel` | Batalkan (jika Antrean) | Pembeli |
+
+                ### 15.6 Dashboard Penjual dan Update Status (Layanan "Update Status")
+
+                | Method | Endpoint | Deskripsi | Peran |
+                |---|---|---|---|
+                | GET | `/seller/orders?status=queued,processing` | Daftar pesanan tenan | Penjual |
+                | GET | `/seller/orders/{id}` | Detail pesanan | Penjual |
+                | PATCH | `/seller/orders/{id}/status` | Ubah status `{status: "processing" \| "done"}` | Penjual |
+                | POST | `/seller/orders/{id}/cancel` | Batalkan dengan alasan | Penjual |
+
+                ### 15.7 Pembaruan Real-time
+
+                | Mekanisme | Endpoint/Channel | Keterangan |
+                |---|---|---|
+                | Polling (pembeli) | `GET /orders/{id}` setiap 3–10 detik | Hentikan polling bila status final |
+                | Polling (penjual) | `GET /seller/orders?since=<timestamp>` | Ambil pesanan baru/berubah |
+                    | WebSocket | `ws /realtime` — channel `order:{id}` (pembeli), `stall:{id}` (penjual) | Event:
+                    `order.created`, `order.status_changed`, `stock.updated` |
+
+                    ---
+
+                    ## 16. Kasus Tepi dan Penanganan Error
+
+                    ### 16.1 Daftar kasus
+
+                    | # | Situasi | Penanganan |
+                    |---|---|---|
+                    | E1 | Stok habis saat pembeli sudah menaruh item di keranjang | Validasi ulang di checkout;
+                    tampilkan pesan dan tawarkan penyesuaian jumlah/hapus item. |
+                    | E2 | Dua pembeli memesan porsi terakhir bersamaan | Pengurangan stok atomik (transaksi DB /
+                    `UPDATE ... WHERE stock >= qty`); pemesan kedua menerima error 409 `OUT_OF_STOCK`. |
+                    | E3 | Harga menu berubah saat item di keranjang | Keranjang menampilkan harga terbaru; beri tahu
+                    pembeli sebelum bayar. |
+                    | E4 | Pembeli menambah item dari tenan berbeda | Minta konfirmasi mengosongkan keranjang lama. |
+                    | E5 | Tenan tutup saat checkout | Tolak dengan pesan jelas. |
+                    | E6 | Pembayaran gagal/kedaluwarsa | Pesanan menjadi `failed`/`cancelled`, reservasi stok
+                    dikembalikan, pembeli dapat mencoba lagi. |
+                    | E7 | Pengiriman checkout ganda (klik dua kali/retry jaringan) | Idempotency key pada `POST
+                    /orders`; kembalikan pesanan yang sama. |
+                    | E8 | Koneksi putus saat memantau status | Tampilkan indikator offline, auto-reconnect/lanjut
+                    polling, sinkronkan status terakhir saat tersambung. |
+                    | E9 | Penjual salah menekan "Selesai" | Konfirmasi sebelum aksi; status tidak dapat dimundurkan
+                    pada MVP (fallback: catat pada log). **[Asumsi]** |
+                    | E10 | Penjual mencoba melompat status (Antrean → Selesai) | Ditolak 409; tampilkan transisi valid.
+                    |
+                    | E11 | Penjual mengakses pesanan tenan lain | 403 Forbidden. |
+                    | E12 | Menu dihapus saat ada pesanan aktif/riwayat | Soft delete; data snapshot pada `order_items`
+                    tetap utuh. |
+                    | E13 | Pesanan menumpuk saat jam sibuk | Daftar terurut waktu, penanda jumlah antrean, performa
+                    dioptimalkan lewat indeks DB dan paginasi. |
+                    | E14 | Pembeli menutup aplikasi sebelum pembayaran selesai | Pesanan `pending_payment` kedaluwarsa
+                    otomatis; stok dikembalikan. |
+                    | E15 | Pembeli tidak mengambil makanan yang sudah Selesai | Di luar lingkup MVP; dicatat sebagai
+                    pengembangan lanjutan. |
+
+                    ### 16.2 Strategi stok **[Asumsi]**
+                    Pilihan yang disarankan: **reservasi stok saat checkout** (`pending_payment`), **konfirmasi saat
+                    pembayaran sukses**, dan **rilis otomatis** bila gagal/kedaluwarsa. Ini sesuai mitigasi proposal
+                    ("stok berkurang otomatis saat pesanan masuk") sekaligus mencegah *overselling*.
+
+                    ---
+
+                    ## 17. Strategi Pengujian dan Kriteria Penerimaan
+
+                    ### 17.1 Jenis pengujian
+
+                    | Jenis | Cakupan | Alat (usulan) |
+                    |---|---|---|
+                    | Unit test | Perhitungan total, validasi stok, transisi status | Jest / PHPUnit / Flutter test |
+                    | Pengujian API | Seluruh endpoint (positif & negatif), otorisasi peran | Postman / Newman,
+                    Supertest |
+                    | Pengujian integrasi | UI ↔ API, alur penuh | Manual terskrip / integration test |
+                    | Uji beban sederhana | Lonjakan pesanan jam istirahat | k6 / Apache JMeter / Artillery |
+                    | Uji konkurensi stok | Pesanan bersamaan atas stok terbatas | Skrip paralel |
+                    | UAT | Pembeli & penjual nyata/simulasi | Skenario tertulis |
+                    | Uji kegunaan | Kemudahan dashboard bagi penjual | Observasi + panduan singkat |
+
+                    ### 17.2 Kriteria penerimaan per fitur
+
+                    | Fitur | Kriteria Penerimaan |
+                    |---|---|
+                    | Daftar Tenan | Given pembeli login, When membuka beranda, Then daftar tenan aktif tampil beserta
+                    status buka/tutup. |
+                    | Menu & Stok | Given menu stok 0, Then tampil "Habis" dan tombol tambah nonaktif. |
+                    | Keranjang | Given item ditambah dengan qty & catatan, Then subtotal dan total dihitung benar; qty
+                    tidak melebihi stok. |
+                    | Pembayaran Dummy | Given checkout valid, When simulasi sukses, Then pesanan berstatus Antrean dan
+                    muncul di dashboard tenan. When gagal, Then tidak ada pesanan aktif dan stok tidak berkurang. |
+                    | Status Pesanan | Given penjual mengubah status, Then pembeli melihat perubahan dalam target waktu
+                    (≤ interval polling / ≤ 5 dtk WebSocket). |
+                    | Dashboard Penjual | Given pesanan masuk, Then tampil otomatis tanpa muat ulang; penjual dapat
+                    mengubah Antrean → Diproses → Selesai. |
+                    | CRUD Menu | Given penjual menambah/mengubah/menghapus menu, Then perubahan tercermin di aplikasi
+                    pembeli. |
+                    | Stok otomatis | Given pesanan berhasil, Then stok berkurang sebesar qty. |
+                    | Otorisasi | Given penjual A, When mengakses data tenan B, Then ditolak (403). |
+                    | Alur end-to-end | Pembeli dapat menyelesaikan alur dari memilih menu sampai status Selesai tanpa
+                    kendala. |
+
+                    ### 17.3 Definition of Done
+                    1. Fitur sesuai kebutuhan fungsional dan kriteria penerimaan.
+                    2. Lolos pengujian (unit/API/integrasi) tanpa bug *blocker/critical*.
+                    3. Kode di-*review* dan digabung ke branch utama.
+                    4. Dokumentasi API dan catatan pengujian diperbarui.
+                    5. Dapat didemonstrasikan pada presentasi akhir.
+
+                    ---
+
+                    ## 18. Risiko dan Mitigasi
+
+                    | # | Risiko | Dampak | Kemungkinan | Mitigasi |
+                    |---|---|---|---|---|
+                    | R1 | Penjual kurang terbiasa memakai aplikasi | Adopsi rendah | Sedang | Dashboard sederhana
+                    disertai panduan singkat; uji kegunaan bersama penjual. |
+                    | R2 | Data stok tidak sinkron dengan kondisi nyata | Pesanan tidak bisa dipenuhi | Sedang |
+                    Pembaruan stok cepat; stok berkurang otomatis saat pesanan masuk; opsi tandai "Habis". |
+                    | R3 | Keterlambatan pembaruan status pesanan | Pembeli tidak tahu kapan pesanan siap | Sedang |
+                    WebSocket atau polling dengan interval pendek; indikator koneksi. |
+                    | R4 | Lonjakan pesanan pada jam istirahat | Server lambat/gagal | Sedang | Uji beban sederhana;
+                    optimasi permintaan API, indeks DB, caching menu. |
+                    | R5 | Keterbatasan waktu (8–9 minggu) **[Asumsi]** | Fitur tak selesai | Sedang | Prioritas MoSCoW;
+                    mulai dari polling; fitur *Could* ditunda. |
+                    | R6 | Keahlian teknologi tim tidak merata **[Asumsi]** | Hambatan implementasi | Sedang | Pilih
+                    stack yang paling dikuasai; *pair programming*; keputusan stack di Minggu 1. |
+                    | R7 | Overselling stok akibat konkurensi **[Asumsi]** | Pesanan tidak terpenuhi | Rendah–Sedang |
+                    Transaksi atomik + uji konkurensi. |
+                    | R8 | Ketergantungan pada data tenan nyata **[Asumsi]** | Demo kurang realistis | Rendah | Siapkan
+                    *seed data* tenan/menu contoh. |
+
+                    ---
+
+                    ## 19. Jadwal, Milestone, dan Pembagian Tugas
+
+                    ### 19.1 Jadwal (dari proposal; iteratif dan dapat disesuaikan)
+
+                    | Minggu | Kegiatan | Keluaran | Milestone |
+                    |---|---|---|---|
+                    | 1 | Analisis kebutuhan dan perancangan | Daftar kebutuhan, use case, wireframe | M1: Requirement
+                    baseline |
+                    | 2 | Desain UI dan pembuatan prototipe | Prototipe antarmuka (Figma) | M2: Prototipe disetujui |
+                    | 3–4 | Implementasi Tahap UI | Halaman tenan, keranjang, status, dashboard | M3: UI selesai (data
+                    dummy/mock) |
+                    | 5–6 | Implementasi Tahap API | API menu, keranjang, status, dummy payment | M4: API selesai |
+                    | 7 | Integrasi UI dan API | Aplikasi terintegrasi | M5: Aplikasi terintegrasi |
+                    | 8 | Pengujian dan perbaikan | Laporan pengujian | M6: Lolos pengujian |
+                    | 9 | Dokumentasi dan presentasi | Laporan akhir dan demo | M7: Penyerahan akhir |
+
+                    ### 19.2 Pembagian tugas (dari proposal)
+
+                    | Nama | Peran | Tanggung Jawab |
+                    |---|---|---|
+                    | Ana | Project Manager / UI Designer | Perencanaan, desain antarmuka |
+                    | Rara | Frontend Developer | Implementasi Tahap UI |
+                    | Dini | Backend Developer | Implementasi Tahap API |
+                    | Desi | QA / Dokumentasi | Pengujian dan laporan |
+
+                    > ⚠️ **Perlu rekonsiliasi:** nama pada tabel pembagian tugas (Ana, Rara, Dini, Desi — 4 orang)
+                    berbeda dengan nama penyusun proposal di sampul (3 orang: Tri Dewi Wulandari, Elsa Mala Mahasina,
+                    Syafinatus Safara). Mohon konfirmasi nama dan peran final sebelum dokumen ini dibekukan.
+
+                    ### 19.3 Matriks tanggung jawab (RACI) **[Asumsi]**
+
+                    | Aktivitas | PM/UI | Frontend | Backend | QA/Dok |
+                    |---|---|---|---|---|
+                    | Kebutuhan & use case | **A/R** | C | C | C |
+                    | Desain UI/prototipe | **A/R** | C | I | I |
+                    | Implementasi UI | C | **A/R** | I | I |
+                    | Implementasi API | C | I | **A/R** | I |
+                    | Integrasi | A | R | R | C |
+                    | Pengujian | I | C | C | **A/R** |
+                    | Dokumentasi & presentasi | A | C | C | **R** |
+
+                    *R = Responsible, A = Accountable, C = Consulted, I = Informed.*
+
+                    ---
+
+                    ## 20. Asumsi, Dependensi, dan Pertanyaan Terbuka
+
+                    ### 20.1 Asumsi utama
+                    1. Satu pesanan hanya untuk satu tenan (BR-01).
+                    2. Tidak ada pajak atau biaya layanan; total = jumlah harga item.
+                    3. Satu akun penjual terkait satu tenan.
+                    4. Notifikasi minimal in-app; push notification bersifat tambahan.
+                    5. Pembeli mengambil makanan sendiri di tenan; kode pesanan digunakan sebagai verifikasi.
+                    6. Data tenan/menu awal dimasukkan lewat *seed* atau oleh penjual.
+                    7. Pengguna memiliki smartphone dengan koneksi internet di area kampus.
+
+                    ### 20.2 Dependensi
+                    - Ketersediaan jaringan internet/Wi-Fi kampus.
+                    - Keputusan teknologi (framework, backend, DB) oleh tim.
+                    - Kesediaan perwakilan tenan untuk uji kegunaan (disarankan).
+                    - Layanan hosting/server untuk demo (lokal atau cloud tier gratis). **[Asumsi]**
+
+                    ### 20.3 Pertanyaan terbuka
+
+                    | # | Pertanyaan | Pemilik | Batas Keputusan |
+                    |---|---|---|---|
+                    | Q1 | Teknologi final: Flutter/React/React Native; Node.js/Laravel; MySQL/PostgreSQL? | Tim |
+                    Minggu 1 |
+                    | Q2 | Apakah tampilan merchant berada dalam aplikasi yang sama (role-based) atau aplikasi/web
+                    terpisah? | Tim | Minggu 1–2 |
+                    | Q3 | Polling atau WebSocket untuk MVP? | Backend + Frontend | Minggu 5 |
+                    | Q4 | Apakah pembatalan oleh pembeli/penjual masuk MVP? | PM | Minggu 1 |
+                    | Q5 | Apakah keranjang multi-tenan diperbolehkan? (Asumsi: tidak) | PM | Minggu 1 |
+                    | Q6 | Apakah ada fitur jam operasional / slot waktu pengambilan? | PM | Minggu 2 |
+                    | Q7 | Nama dan peran anggota tim final (lihat catatan Bagian 19.2). | Tim | Segera |
+                    | Q8 | Cara akun penjual dibuat (admin/seed atau registrasi mandiri)? | Tim | Minggu 1 |
+                    | Q9 | Apakah push notification (FCM) dibutuhkan atau cukup in-app? | Tim | Minggu 4 |
+
+                    ---
+
+                    ## 21. Roadmap Pengembangan Lanjutan
+
+                    | Fase | Fitur | Keterangan |
+                    |---|---|---|
+                    | **v1.0 (proyek ini)** | Pre-order, keranjang, status pesanan, dashboard penjual, dummy payment |
+                    Cakupan PRD ini |
+                    | **v1.1** | Riwayat pesanan, pembatalan, push notification, pencarian | Peningkatan kegunaan |
+                    | **v2.0** | Integrasi pembayaran nyata (e-wallet/QRIS produksi) | Memerlukan kepatuhan keamanan dan
+                    kerja sama penyedia pembayaran |
+                    | **v2.1** | Slot waktu pengambilan, estimasi waktu siap | Mengurangi penumpukan |
+                    | **v3.0** | Ulasan, promo, program loyalitas | Dari daftar di luar lingkup proposal |
+                    | **v3.x** | Layanan pengantaran makanan | Dari daftar di luar lingkup proposal |
+                    | **Lanjutan** | Analitik penjualan untuk penjual dan kampus, prediksi stok | Dukungan perencanaan
+                    stok |
+
+                    ---
+
+                    ## 22. Glosarium
+
+                    | Istilah | Definisi |
+                    |---|---|
+                    | **Pre-order** | Pemesanan di muka sebelum pembeli tiba di lokasi. |
+                    | **Tenan** | Kios/penjual makanan di kantin kampus (merchant). |
+                    | **Merchant** | Istilah lain untuk penjual/tenan pada sistem. |
+                    | **Dashboard Penjual** | Layar khusus penjual untuk mengelola menu, stok, dan pesanan. |
+                    | **Dummy Payment Gateway** | Layanan simulasi pembayaran tanpa transaksi uang nyata. |
+                    | **Polling** | Klien meminta data ke server secara berkala. |
+                    | **WebSocket** | Koneksi dua arah persisten untuk pembaruan real-time. |
+                    | **CRUD** | Create, Read, Update, Delete. |
+                    | **REST API** | Antarmuka layanan web berbasis HTTP dan sumber daya. |
+                    | **JWT** | JSON Web Token, token autentikasi. |
+                    | **RBAC** | Role-Based Access Control, kontrol akses berbasis peran. |
+                    | **Overselling** | Terjualnya stok melebihi jumlah yang tersedia. |
+                    | **Idempotensi** | Pengulangan permintaan yang sama menghasilkan efek yang sama. |
+                    | **MoSCoW** | Metode prioritas: Must, Should, Could, Won't. |
+                    | **UAT** | User Acceptance Testing. |
+                    | **QRIS** | Standar kode QR pembayaran nasional Indonesia. |
+
+                    ---
+
+                    *Akhir dokumen PRD KantinQ v1.0.*
