@@ -340,43 +340,39 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Row(
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          alignment: WrapAlignment.center,
                           children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  authCtrl.loginAsDemoBuyer();
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  visualDensity: VisualDensity.compact,
-                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-                                  side: const BorderSide(color: AppColors.secondary),
-                                ),
-                                child: const Text(
-                                  'Akun Mahasiswa',
-                                  style: TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.bold),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                            OutlinedButton.icon(
+                              onPressed: () => authCtrl.loginAsDemoBuyer(),
+                              icon: const Icon(Icons.person_rounded, size: 14),
+                              label: const Text('Mahasiswa (Tamu)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                              style: OutlinedButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                foregroundColor: AppColors.secondary,
+                                side: const BorderSide(color: AppColors.secondary),
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  authCtrl.loginAsDemoSeller(canteenId: _selectedCanteenId);
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  visualDensity: VisualDensity.compact,
-                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-                                  side: const BorderSide(color: AppColors.primary),
-                                ),
-                                child: const Text(
-                                  'Akun Penjual Stan',
-                                  style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                            OutlinedButton.icon(
+                              onPressed: () => authCtrl.loginAsDemoSeller(canteenId: 'c2'),
+                              icon: const Icon(Icons.soup_kitchen_rounded, size: 14),
+                              label: const Text('Mas Joni (Stan 02)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                              style: OutlinedButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                foregroundColor: AppColors.primary,
+                                side: const BorderSide(color: AppColors.primary),
+                              ),
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: () => authCtrl.loginAsDemoSeller(canteenId: 'c1'),
+                              icon: const Icon(Icons.storefront_rounded, size: 14),
+                              label: const Text('Bu Sri (Stan 01)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                              style: OutlinedButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                foregroundColor: AppColors.textPrimary,
+                                side: const BorderSide(color: AppColors.outline),
                               ),
                             ),
                           ],

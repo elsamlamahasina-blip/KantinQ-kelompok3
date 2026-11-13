@@ -174,6 +174,32 @@ class _MerchantVoucherFormSheetState extends State<MerchantVoucherFormSheet> {
                     ],
                   ),
                   const Divider(),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: AppDimens.sm),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryContainer.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(AppDimens.radiusSm),
+                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.storefront_rounded, size: 16, color: AppColors.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Voucher ini khusus berlaku untuk ${widget.canteenName}. Tidak akan masuk atau berlaku di stan penjual lain.',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryDark,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: AppDimens.xs),
                   AppTextField(
                     controller: _codeController,

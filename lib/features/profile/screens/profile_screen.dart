@@ -126,7 +126,7 @@ class ProfileScreen extends StatelessWidget {
                         code: v.code,
                         discount: 'Diskon ${CurrencyFormatter.format(v.discountAmount)}',
                         desc: v.description,
-                        stallLabel: v.isGlobal ? 'Semua Stan KantinQ' : (v.canteenName ?? 'Stan Mitra'),
+                        stallLabel: 'Khusus ${v.canteenName ?? 'Stan Mitra'} (hanya berlaku di stan ini)',
                         quotaLabel: 'Sisa kuota: ${v.remainingQuota}',
                         onCopy: () {
                           Clipboard.setData(ClipboardData(text: v.code));
@@ -413,10 +413,24 @@ class _VoucherItem extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                stallLabel,
+                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondaryDark),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 3),
             Text(
-              '$stallLabel • $quotaLabel',
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primaryDark),
+              quotaLabel,
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMuted),
             ),
             const SizedBox(height: 2),
             Text(desc, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),

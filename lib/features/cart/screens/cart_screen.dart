@@ -373,114 +373,114 @@ class _CartScreenState extends State<CartScreen> {
                           ),
                         ),
                       ] else ...[
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppTextField(
-                                controller: _voucherController,
-                                hint: 'Gunakan: KANTINQHEMAT',
-                              ),
-                            ),
-                            const SizedBox(width: AppDimens.sm),
-                            ElevatedButton(
-                              onPressed: () {
-                                final result = cartController.applyVoucherWithMessage(_voucherController.text);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(result.message),
-                                    backgroundColor: result.success ? AppColors.secondary : AppColors.error,
-                                  ),
-                                );
-                                if (result.success) {
-                                  _voucherController.clear();
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDimens.radiusMd)),
-                              ),
-                              child: const Text('Terapkan'),
-                            ),
-                          ],
-                        ),
                         Builder(
                           builder: (context) {
                             final availableVouchers = voucherCtrl.getAvailableVouchersForCart(
                               cartController.primaryCanteenId,
                             );
-                            if (availableVouchers.isEmpty) {
-                              return const SizedBox.shrink();
-                            }
+                            final sampleCode = availableVouchers.isNotEmpty ? availableVouchers.first.code : 'KODE';
+
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'Voucher tersedia untuk pesanan ini (ketuk untuk pakai):',
-                                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: AppTextField(
+                                        controller: _voucherController,
+                                        hint: 'Gunakan voucher: $sampleCode',
+                                      ),
+                                    ),
+                                    const SizedBox(width: AppDimens.sm),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        final result = cartController.applyVoucherWithMessage(_voucherController.text);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(result.message),
+                                            backgroundColor: result.success ? AppColors.secondary : AppColors.error,
+                                          ),
+                                        );
+                                        if (result.success) {
+                                          _voucherController.clear();
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDimens.radiusMd)),
+                                      ),
+                                      child: const Text('Terapkan'),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 6),
-                                SizedBox(
-                                  height: 54,
-                                  child: ListView.separated(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: availableVouchers.length,
-                                    separatorBuilder: (_, _) => const SizedBox(width: 8),
-                                    itemBuilder: (context, idx) {
-                                      final v = availableVouchers[idx];
-                                      final isEligible = cartController.subtotal >= v.minPurchase;
-                                      return InkWell(
-                                        onTap: () {
-                                          final res = cartController.applyVoucherWithMessage(v.code);
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(res.message),
-                                              backgroundColor: res.success ? AppColors.secondary : AppColors.warning,
-                                            ),
-                                          );
-                                        },
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                          decoration: BoxDecoration(
-                                            color: isEligible ? AppColors.primaryContainer : AppColors.surfaceVariant,
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(
-                                              color: isEligible
-                                                  ? AppColors.primary.withValues(alpha: 0.45)
-                                                  : AppColors.outline,
-                                            ),
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                '${v.code} • -${CurrencyFormatter.format(v.discountAmount)}',
-                                                style: TextStyle(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: isEligible ? AppColors.primaryDark : AppColors.textSecondary,
-                                                ),
-                                              ),
-                                              Text(
-                                                v.isGlobal
-                                                    ? (v.minPurchase > 0
-                                                        ? 'Semua stan • Min. ${CurrencyFormatter.format(v.minPurchase)}'
-                                                        : 'Semua stan • Tanpa min.')
-                                                    : (v.minPurchase > 0
-                                                        ? 'Khusus stan ini • Min. ${CurrencyFormatter.format(v.minPurchase)}'
-                                                        : 'Khusus stan ini • Tanpa min.'),
-                                                style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                if (availableVouchers.isNotEmpty) ...[
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    'Voucher khusus stan ${cartController.currentCanteenName} (hanya berlaku di stan ini):',
+                                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
                                   ),
-                                ),
+                                  const SizedBox(height: 6),
+                                  SizedBox(
+                                    height: 54,
+                                    child: ListView.separated(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: availableVouchers.length,
+                                      separatorBuilder: (_, _) => const SizedBox(width: 8),
+                                      itemBuilder: (context, idx) {
+                                        final v = availableVouchers[idx];
+                                        final isEligible = cartController.subtotal >= v.minPurchase;
+                                        return InkWell(
+                                          onTap: () {
+                                            final res = cartController.applyVoucherWithMessage(v.code);
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(res.message),
+                                                backgroundColor: res.success ? AppColors.secondary : AppColors.warning,
+                                              ),
+                                            );
+                                          },
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                            decoration: BoxDecoration(
+                                              color: isEligible ? AppColors.primaryContainer : AppColors.surfaceVariant,
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: isEligible
+                                                    ? AppColors.primary.withValues(alpha: 0.45)
+                                                    : AppColors.outline,
+                                              ),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  '${v.code} • -${CurrencyFormatter.format(v.discountAmount)}',
+                                                  style: const TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColors.primaryDark,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  v.minPurchase > 0
+                                                      ? 'Min. ${CurrencyFormatter.format(v.minPurchase)}'
+                                                      : 'Tanpa min. belanja',
+                                                  style: const TextStyle(
+                                                    fontSize: 10,
+                                                    color: AppColors.textSecondary,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ],
                             );
                           },

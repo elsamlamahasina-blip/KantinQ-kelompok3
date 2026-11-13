@@ -42,10 +42,20 @@ class AuthController extends ChangeNotifier {
 
     final isMerchant = role == UserRole.seller || email.contains('penjual') || email.contains('merchant');
     final actualRole = isMerchant ? UserRole.seller : UserRole.buyer;
+    final targetCanteenId = actualRole == UserRole.seller ? (sellerCanteenId ?? 'c1') : null;
+    final stallOwnerName = targetCanteenId == 'c2'
+        ? 'Mas Joni (Stan Bakso & Mie)'
+        : targetCanteenId == 'c3'
+            ? 'Pengelola Ayam Geprek Kampus'
+            : targetCanteenId == 'c4'
+                ? 'Pengelola KantinQ Dimsum & Kopi'
+                : targetCanteenId == 'c5'
+                    ? 'Bu Dewi (Dapur Sehat)'
+                    : 'Bu Sri (Kantin Nusantara)';
 
     _currentUser = UserModel(
-      id: isMerchant ? 'seller_c1' : 'u1',
-      name: isMerchant ? 'Pengelola KantinQ' : email.split('@').first,
+      id: isMerchant ? 'seller_$targetCanteenId' : 'u1',
+      name: isMerchant ? stallOwnerName : email.split('@').first,
       email: email,
       phone: isMerchant ? '081298765432' : '081234567890',
       avatarUrl: isMerchant
@@ -54,7 +64,7 @@ class AuthController extends ChangeNotifier {
       campusLocation: isMerchant ? 'Kantin Utama Lt. 1' : 'Kantin Utama — Gedung A Lt. 1',
       memberTier: isMerchant ? 'Mitra Merchant KantinQ' : 'KantinQ Gold Member',
       role: actualRole,
-      sellerCanteenId: actualRole == UserRole.seller ? (sellerCanteenId ?? 'c1') : null,
+      sellerCanteenId: targetCanteenId,
     );
     _isLoggedIn = true;
     _isLoading = false;
@@ -139,10 +149,20 @@ class AuthController extends ChangeNotifier {
   }
 
   void loginAsDemoSeller({String canteenId = 'c1'}) {
+    final stallOwnerName = canteenId == 'c2'
+        ? 'Mas Joni (Stan Bakso & Mie)'
+        : canteenId == 'c3'
+            ? 'Pengelola Ayam Geprek Kampus'
+            : canteenId == 'c4'
+                ? 'Pengelola KantinQ Dimsum & Kopi'
+                : canteenId == 'c5'
+                    ? 'Bu Dewi (Dapur Sehat)'
+                    : 'Bu Sri (Kantin Nusantara)';
+
     _currentUser = UserModel(
       id: 'seller_$canteenId',
-      name: 'Pengelola KantinQ (Mitra Terpadu)',
-      email: 'merchant@kantinq.com',
+      name: stallOwnerName,
+      email: canteenId == 'c2' ? 'mas.joni@kantinq.com' : 'merchant.$canteenId@kantinq.com',
       phone: '081298765432',
       avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
       campusLocation: 'Kantin Utama Lt. 1',

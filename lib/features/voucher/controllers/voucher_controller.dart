@@ -13,6 +13,7 @@ typedef VoucherValidationResult = ({
 class VoucherController extends ChangeNotifier {
   final List<VoucherModel> _vouchers = [
     // Promo spesifik setiap akun penjual stan kantin (c1 - c5)
+    // Berlaku khusus dalam satu stan (tidak bercampur ke stan lain)
     const VoucherModel(
       id: 'v_c1_1',
       code: 'BUSRI5RB',
@@ -36,6 +37,17 @@ class VoucherController extends ChangeNotifier {
       quota: 60,
     ),
     const VoucherModel(
+      id: 'v_c1_3',
+      code: 'KANTINQHEMAT',
+      title: 'Voucher Hemat Bu Sri',
+      description: 'Potongan Rp 5.000 khusus pesanan di Kantin Bu Sri tanpa minimal pembelian.',
+      canteenId: 'c1',
+      canteenName: 'Kantin Bu Sri — Masakan Nusantara',
+      discountAmount: 5000,
+      minPurchase: 0,
+      quota: 999,
+    ),
+    const VoucherModel(
       id: 'v_c2_1',
       code: 'MASJONI4RB',
       title: 'Traktiran Bakso Mas Joni',
@@ -45,6 +57,17 @@ class VoucherController extends ChangeNotifier {
       discountAmount: 4000,
       minPurchase: 15000,
       quota: 80,
+    ),
+    const VoucherModel(
+      id: 'v_c2_2',
+      code: 'JONIKOMPLIT',
+      title: 'Paket Komplit Mas Joni',
+      description: 'Diskon Rp 5.000 khusus pesanan di Stan Bakso & Mie Mas Joni min. belanja Rp 20.000.',
+      canteenId: 'c2',
+      canteenName: 'Stan Bakso & Mie Mas Joni',
+      discountAmount: 5000,
+      minPurchase: 20000,
+      quota: 100,
     ),
     const VoucherModel(
       id: 'v_c3_1',
@@ -79,34 +102,6 @@ class VoucherController extends ChangeNotifier {
       minPurchase: 15000,
       quota: 60,
     ),
-    // Voucher global platform KantinQ
-    const VoucherModel(
-      id: 'v_global_1',
-      code: 'KANTINQHEMAT',
-      title: 'Voucher Hemat KantinQ',
-      description: 'Potongan Rp 5.000 berlaku untuk semua stan kantin tanpa minimal pembelian.',
-      discountAmount: 5000,
-      minPurchase: 0,
-      quota: 999,
-    ),
-    const VoucherModel(
-      id: 'v_global_2',
-      code: 'HEMAT10RB',
-      title: 'Diskon Rombongan 10Rb',
-      description: 'Potongan Rp 10.000 untuk pesanan minimal Rp 30.000 di seluruh stan kantin.',
-      discountAmount: 10000,
-      minPurchase: 30000,
-      quota: 500,
-    ),
-    const VoucherModel(
-      id: 'v_global_3',
-      code: 'DISKON5RB',
-      title: 'Diskon Harian Mahasiswa',
-      description: 'Potongan langsung Rp 5.000 berlaku di seluruh stan KantinQ.',
-      discountAmount: 5000,
-      minPurchase: 0,
-      quota: 999,
-    ),
   ];
 
   List<VoucherModel> get allVouchers => List.unmodifiable(_vouchers);
@@ -115,7 +110,7 @@ class VoucherController extends ChangeNotifier {
       _vouchers.where((v) => v.isUsable).toList();
 
   List<VoucherModel> get activeCanteenVouchers =>
-      _vouchers.where((v) => v.isUsable && !v.isGlobal).toList();
+      _vouchers.where((v) => v.isUsable).toList();
 
   List<VoucherModel> getVouchersForCanteen(String canteenId) =>
       _vouchers.where((v) => v.canteenId == canteenId).toList();
@@ -124,18 +119,13 @@ class VoucherController extends ChangeNotifier {
       _vouchers.where((v) => v.canteenId == canteenId && v.isUsable).toList();
 
   List<VoucherModel> getAvailableVouchersForCart(String? cartCanteenId) {
+    if (cartCanteenId == null || cartCanteenId.isEmpty) return const [];
     final matching = _vouchers.where((v) {
       if (!v.isUsable) return false;
-      if (v.isGlobal) return true;
-      if (cartCanteenId == null || cartCanteenId.isEmpty) return true;
       return v.canteenId == cartCanteenId;
     }).toList();
 
-    matching.sort((a, b) {
-      if (!a.isGlobal && b.isGlobal) return -1;
-      if (a.isGlobal && !b.isGlobal) return 1;
-      return b.discountAmount.compareTo(a.discountAmount);
-    });
+    matching.sort((a, b) => b.discountAmount.compareTo(a.discountAmount));
     return matching;
   }
 
@@ -207,14 +197,20 @@ class VoucherController extends ChangeNotifier {
       );
     }
 
-    if (!voucher.isGlobal &&
-        cartCanteenId != null &&
-        cartCanteenId.isNotEmpty &&
-        voucher.canteenId != cartCanteenId) {
+    if (cartCanteenId == null || cartCanteenId.isEmpty) {
+      return (
+        isValid: false,
+        message: 'Pilih menu makanan terlebih dahulu sebelum menerapkan voucher.',
+        discount: 0,
+        voucher: voucher,
+      );
+    }
+
+    if (voucher.canteenId != cartCanteenId) {
       final stallLabel = voucher.canteenName ?? 'stan penerbit voucher';
       return (
         isValid: false,
-        message: 'Voucher "$clean" hanya berlaku untuk pesanan dari $stallLabel.',
+        message: 'Voucher "$clean" hanya berlaku untuk pesanan di $stallLabel.',
         discount: 0,
         voucher: voucher,
       );
@@ -242,6 +238,12 @@ class VoucherController extends ChangeNotifier {
   }
 
   ({bool success, String message}) addVoucher(VoucherModel voucher) {
+    if (voucher.canteenId == null || voucher.canteenId!.isEmpty) {
+      return (
+        success: false,
+        message: 'Voucher harus terikat ke satu akun stan kantin.',
+      );
+    }
     final cleanCode = voucher.code.trim().toUpperCase();
     if (cleanCode.length < 3) {
       return (

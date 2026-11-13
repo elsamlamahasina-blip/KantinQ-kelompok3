@@ -550,5 +550,102 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       expect(tester.takeException(), isNull);
     });
+
+    test('Strict stall isolation: Mas Joni voucher is never accessible to other stalls or carts', () {
+      final voucherCtrl = AppState.instance.voucherController;
+
+      final initialJoni = voucherCtrl.getVouchersForCanteen('c2');
+      expect(initialJoni.any((v) => v.code == 'MASJONI4RB'), isTrue);
+
+      final initialSri = voucherCtrl.getVouchersForCanteen('c1');
+      expect(initialSri.any((v) => v.code == 'MASJONI4RB'), isFalse);
+
+      const newJoniVoucher = VoucherModel(
+        id: 'v_c2_test_exclusive',
+        code: 'JONIEXCLUSIVE',
+        title: 'Promo Spesial Stan Mas Joni',
+        description: 'Potongan Rp 5.000 khusus stan Mas Joni',
+        canteenId: 'c2',
+        canteenName: 'Stan Bakso & Mie Mas Joni',
+        discountAmount: 5000,
+        minPurchase: 20000,
+        quota: 50,
+      );
+
+      final addResult = voucherCtrl.addVoucher(newJoniVoucher);
+      expect(addResult.success, isTrue);
+
+      // Verify c2 has it, but c1, c3, c4, c5 DO NOT have it
+      expect(voucherCtrl.getVouchersForCanteen('c2').any((v) => v.code == 'JONIEXCLUSIVE'), isTrue);
+      expect(voucherCtrl.getVouchersForCanteen('c1').any((v) => v.code == 'JONIEXCLUSIVE'), isFalse);
+      expect(voucherCtrl.getVouchersForCanteen('c3').any((v) => v.code == 'JONIEXCLUSIVE'), isFalse);
+      expect(voucherCtrl.getVouchersForCanteen('c4').any((v) => v.code == 'JONIEXCLUSIVE'), isFalse);
+      expect(voucherCtrl.getVouchersForCanteen('c5').any((v) => v.code == 'JONIEXCLUSIVE'), isFalse);
+
+      // Cart isolation: cart with Stan Bu Sri (c1) cannot use Mas Joni's voucher
+      final invalidSriRes = voucherCtrl.validateVoucher(
+        'JONIEXCLUSIVE',
+        subtotal: 25000,
+        cartCanteenId: 'c1',
+      );
+      expect(invalidSriRes.isValid, isFalse);
+      expect(invalidSriRes.message, contains('Stan Bakso & Mie Mas Joni'));
+
+      // Cart with Stan Mas Joni (c2) CAN use Mas Joni's voucher
+      final validJoniRes = voucherCtrl.validateVoucher(
+        'JONIEXCLUSIVE',
+        subtotal: 25000,
+        cartCanteenId: 'c2',
+      );
+      expect(validJoniRes.isValid, isTrue);
+      expect(validJoniRes.discount, 5000);
+
+      // Clean up / delete voucher in Mas Joni's account
+      voucherCtrl.deleteVoucher(newJoniVoucher.id);
+      expect(voucherCtrl.findByCode('JONIEXCLUSIVE'), isNull);
+      expect(voucherCtrl.getVouchersForCanteen('c2').any((v) => v.code == 'JONIEXCLUSIVE'), isFalse);
+    });
+
+    testWidgets('MerchantDashboardScreen for Mas Joni (c2) shows only Mas Joni vouchers', (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      AppState.instance.authController.loginAsDemoSeller(canteenId: 'c2');
+
+      await tester.pumpWidget(const MaterialApp(home: MerchantDashboardScreen()));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.text('Voucher'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Should display Mas Joni's voucher, but NOT Bu Sri's voucher
+      expect(find.text('MASJONI4RB'), findsOneWidget);
+      expect(find.text('BUSRI5RB'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('MerchantVoucherFormSheet displays stall name and isolation notice', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: MerchantVoucherFormSheet(
+              canteenId: 'c2',
+              canteenName: 'Stan Bakso & Mie Mas Joni',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        find.textContaining('Voucher ini khusus berlaku untuk Stan Bakso & Mie Mas Joni'),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
   });
 }
