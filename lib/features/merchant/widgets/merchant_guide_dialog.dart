@@ -49,7 +49,7 @@ class MerchantGuideDialog extends StatelessWidget {
             _GuideStep(
               number: '4',
               title: 'Verifikasi Kode & Penyerahan',
-              description: 'Cocokkan Nomor Antrean atau scan QR Code pembeli saat menyerahkan makanan untuk memastikan ketepatan pesanan.',
+              description: 'Cocokkan Nomor Antrean pembeli dan terima pembayaran tunai (COD) saat menyerahkan makanan.',
             ),
             SizedBox(height: 12),
             _GuideStep(

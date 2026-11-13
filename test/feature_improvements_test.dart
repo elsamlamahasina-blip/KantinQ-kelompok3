@@ -438,6 +438,9 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: OrderTrackingScreen(orderId: latestId)));
       await tester.pump();
       expect(tester.takeException(), isNull);
+      expect(find.byIcon(Icons.qr_code_2_rounded), findsNothing);
+      expect(find.textContaining('Tunjukkan QR Code'), findsNothing);
+      expect(find.textContaining('bayar tunai (COD)'), findsWidgets);
 
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: DigitalReceiptSheet(order: completedOrder))));
       await tester.pump();

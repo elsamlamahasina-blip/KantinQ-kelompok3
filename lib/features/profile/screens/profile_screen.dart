@@ -82,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: const [
               Text('1. Bagaimana cara mengambil pesanan?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-              Text('Tunjukkan Nomor Antrean atau QR Code di layar Pesanan kepada penjual stan kantin saat status pesanan menjadi "Siap Diambil".', style: TextStyle(fontSize: 12)),
+              Text('Tunjukkan atau sebutkan Nomor Antrean di layar Pesanan kepada penjual stan kantin saat status pesanan menjadi "Siap Diambil".', style: TextStyle(fontSize: 12)),
               SizedBox(height: 10),
               Text('2. Apakah bisa membatalkan pesanan?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
               Text('Pesanan hanya dapat dibatalkan selama masih dalam status "Menunggu Konfirmasi". Jika sudah dimasak, pesanan tidak dapat dibatalkan.', style: TextStyle(fontSize: 12)),

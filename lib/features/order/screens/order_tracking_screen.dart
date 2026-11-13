@@ -6,7 +6,6 @@ import '../../../core/state/app_state.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/status_badge.dart';
-import '../../../core/widgets/ticket_shape_clipper.dart';
 import '../models/order_model.dart';
 import '../widgets/digital_receipt_sheet.dart';
 import '../../cart/screens/cart_screen.dart';
@@ -250,166 +249,125 @@ class OrderTrackingScreen extends StatelessWidget {
                   ),
                 ],
 
-                // Digital Queue Ticket (with perforation cutout)
-                ClipPath(
-                  clipper: TicketClipper(
-                    punchRadius: 14,
-                    punchPositionPercent: 0.65,
-                    cornerRadius: 18,
-                  ),
-                  child: Container(
-                    width: double.infinity,
+                // Digital Queue Ticket (without barcode)
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
                     color: AppColors.surface,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Top Section of Ticket
-                        Padding(
-                          padding: const EdgeInsets.all(AppDimens.lg),
-                          child: Column(
-                            children: [
-                              StatusBadge(status: order.status),
-                              const SizedBox(height: AppDimens.sm),
-                              const Text(
-                                'NOMOR ANTREAN ANDA',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textSecondary,
-                                  letterSpacing: 1.0,
-                                ),
+                    borderRadius: BorderRadius.circular(AppDimens.radiusLg),
+                    border: Border.all(color: AppColors.outline),
+                    boxShadow: const [AppColors.softShadow],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Top Section of Ticket
+                      Padding(
+                        padding: const EdgeInsets.all(AppDimens.lg),
+                        child: Column(
+                          children: [
+                            StatusBadge(status: order.status),
+                            const SizedBox(height: AppDimens.sm),
+                            const Text(
+                              'NOMOR ANTREAN ANDA',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textSecondary,
+                                letterSpacing: 1.0,
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                order.queueNumber,
-                                style: const TextStyle(
-                                  fontSize: 44,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppColors.primary,
-                                  letterSpacing: -1.0,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                order.canteenName,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${order.orderTypeLabel} ${order.tableNumber != null ? "• ${order.tableNumber}" : ""}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: AppDimens.md),
-
-                              // Estimated Time Pill
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.secondaryContainer,
-                                  borderRadius: BorderRadius.circular(AppDimens.radiusFull),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.timer_rounded, color: AppColors.secondary, size: 16),
-                                    const SizedBox(width: 6),
-                                    Flexible(
-                                      child: Text(
-                                        'Estimasi Siap: ${DateFormatter.formatTimeOnly(order.estimatedReadyTime)}',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: AppColors.secondaryDark,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Perforated Dashed Divider
-                        SizedBox(
-                          height: 1,
-                          width: double.infinity,
-                          child: CustomPaint(
-                            painter: DashedLinePainter(
-                              color: AppColors.outlineVariant,
-                              dashWidth: 6,
-                              dashSpace: 4,
                             ),
-                          ),
-                        ),
-
-                        // Bottom Section of Ticket (QR Code verification)
-                        Padding(
-                          padding: const EdgeInsets.all(AppDimens.lg),
-                          child: Column(
-                            children: [
-                              const Text(
-                                'Tunjukkan QR Code ini ke kasir stan saat mengambil makanan',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                  height: 1.3,
-                                ),
+                            const SizedBox(height: 4),
+                            Text(
+                              order.queueNumber,
+                              style: const TextStyle(
+                                fontSize: 44,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.primary,
+                                letterSpacing: -1.0,
                               ),
-                              const SizedBox(height: AppDimens.md),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              order.canteenName,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${order.orderTypeLabel} ${order.tableNumber != null ? "• ${order.tableNumber}" : ""}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: AppDimens.md),
 
-                              // Simulated QR Code Frame
-                              Container(
-                                width: 140,
-                                height: 140,
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: AppColors.outline),
-                                  boxShadow: const [AppColors.softShadow],
-                                ),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    Icon(Icons.qr_code_2_rounded, size: 120, color: Colors.grey.shade900),
-                                    Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.primary,
-                                        shape: BoxShape.circle,
+                            // Estimated Time Pill
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: AppColors.secondaryContainer,
+                                borderRadius: BorderRadius.circular(AppDimens.radiusFull),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.timer_rounded, color: AppColors.secondary, size: 16),
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      'Estimasi Siap: ${DateFormatter.formatTimeOnly(order.estimatedReadyTime)}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: AppColors.secondaryDark,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      child: const Icon(Icons.restaurant_rounded, size: 16, color: Colors.white),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: AppDimens.xs),
-                              Text(
-                                order.qrVerificationCode,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textMuted,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // COD Pickup Instructions Banner (Replaces barcode)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: AppDimens.md, vertical: 12),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryContainer,
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(AppDimens.radiusLg),
                           ),
                         ),
-                      ],
-                    ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.payments_rounded, size: 18, color: AppColors.primary),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'Sebutkan kode ${order.queueNumber} di kasir stan & bayar tunai (COD)',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
