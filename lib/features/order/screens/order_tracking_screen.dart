@@ -27,106 +27,6 @@ class OrderTrackingScreen extends StatelessWidget {
     );
   }
 
-  void _showContactDialog(BuildContext context, OrderModel order) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimens.radiusXl)),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppDimens.radiusXl)),
-          clipBehavior: Clip.antiAlias,
-          child: Padding(
-            padding: const EdgeInsets.all(AppDimens.lg),
-            child: SafeArea(
-              top: false,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  const Icon(Icons.storefront_rounded, color: AppColors.primary, size: 24),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      order.canteenName,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              const Text('Nomor WhatsApp / Telp: 0812-9876-5432', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-              const Divider(height: 24),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE8F5E9),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF2E7D32), size: 20),
-                ),
-                title: const Text('Kirim Pesan WhatsApp', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Tanyakan status antrean atau catatan khusus', style: TextStyle(fontSize: 11)),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Membuka WhatsApp ke stan "${order.canteenName}"...'),
-                      backgroundColor: const Color(0xFF2E7D32),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryContainer,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.phone_outlined, color: AppColors.primary, size: 20),
-                ),
-                title: const Text('Panggilan Suara Langsung', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Hubungi pemilik stan lewat telepon', style: TextStyle(fontSize: 11)),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Menghubungi telepon stan "${order.canteenName}"...'),
-                      backgroundColor: AppColors.primary,
-                    ),
-                  );
-                },
-              ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void _cancelOrder(BuildContext context, OrderModel order) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -199,11 +99,6 @@ class OrderTrackingScreen extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.headset_mic_outlined),
-                tooltip: 'Hubungi Stan',
-                onPressed: () => _showContactDialog(context, order),
-              ),
               IconButton(
                 icon: const Icon(Icons.receipt_long_rounded),
                 tooltip: 'Lihat Struk',

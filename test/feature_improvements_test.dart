@@ -439,6 +439,7 @@ void main() {
       await tester.pump();
       expect(tester.takeException(), isNull);
       expect(find.byIcon(Icons.qr_code_2_rounded), findsNothing);
+      expect(find.byIcon(Icons.headset_mic_outlined), findsNothing);
       expect(find.textContaining('Tunjukkan QR Code'), findsNothing);
       expect(find.textContaining('bayar tunai (COD)'), findsWidgets);
 
